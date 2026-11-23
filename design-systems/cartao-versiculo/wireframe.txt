@@ -1,0 +1,55 @@
+Referência: reference.png (IMG_6824.PNG, 1170 x 2532) — tela "compartilhar versículo", estilo 5/6 "Margem"
+Variantes da mesma tela em variantes/ (Estúdio, Orgânico, Pergaminho)
+
++-- fundo-app (cinza escuro, faixa no topo) ---------------------+
+|                                                                |
+| +-- folha (painel bege, cantos grandes arredondados) --------+ |
+| |                                                            | |
+| | +-- cartao (marfim, sombra suave) -----------------------+ | |
+| | | +-- margem -----+                                      | | |
+| | | | [t3: 1]       |                                      | | |
+| | | |   | (fio)     |                                      | | |
+| | | |   |           |   [h1: Ouvi, filhos meus,            | | |
+| | | |   |           |        a instrução do pai;           | | |
+| | | | [t3: 4]       |        prestai atenção, a            | | |
+| | | | [t3: ·]       |        fim de alcançardes            | | |
+| | | | [t3:          |        o discernimento;]             | | |
+| | | |  PROVÉRBIOS]  |                                      | | |
+| | | | (texto        |                                      | | |
+| | | |  vertical)    |      [t3: WWW.BIBLENOTEBOOK.APP]     | | |
+| | | +---------------+                                      | | |
+| | +--------------------------------------------------------+ | |
+| |                                                            | |
+| | +-- seletor-estilo -------------------------------------+ | |
+| | | [btn2: ‹]      [t3: ESTILO 5 / 6]        [btn2: ›]     | | |
+| | |                [h2: Margem]                            | | |
+| | +--------------------------------------------------------+ | |
+| |                                                            | |
+| | +-- grupo-cor -------------------------------------------+ | |
+| | | [t3: COR]                              [t1: Marfim]    | | |
+| | | [btn3: branco] [btn3: grafite] [btn3: areia]           | | |
+| | | [btn3: preto] [btn3: verde] [btn3: caramelo]           | | |
+| | | [btn3: azul] [btn3: roxo] [btn3: marfim — ativo]       | | |
+| | | [btn3: rosa — cortado na borda, a fila rola de lado]   | | |
+| | +--------------------------------------------------------+ | |
+| |                                                            | |
+| | +-- grupo-fonte -----------------------------------------+ | |
+| | | [t3: FONTE]                             [t1: Serif]    | | |
+| | | [btn4: Aa negrito] [btn4: Aa itálico — ativo]          | | |
+| | | [btn4: Aa condensada] [btn4: Aa simples]               | | |
+| | +--------------------------------------------------------+ | |
+| |                                                            | |
+| | +-- acoes -----------------------------------------------+ | |
+| | | [btn5: COPIAR TEXTO]        [btn: SALVAR IMAGEM]       | | |
+| | +--------------------------------------------------------+ | |
+| +------------------------------------------------------------+ |
+|                 (barra de início do iPhone)                    |
++----------------------------------------------------------------+
+
+Legenda das variações
+  btn   botão cheio escuro (ação principal)
+  btn2  botão redondo com contorno (setas)
+  btn3  amostra de cor: quadrado arredondado com um ponto no centro
+  btn4  amostra de fonte: quadrado arredondado com "Aa"
+  btn5  botão com contorno, formato de pílula (ação secundária)
+  t3    rótulo pequeno em maiúsculas, letras espaçadas (fonte de máquina de escrever)

@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* Visual do Púlpito: papel creme, tinta grafite, serifa de livro e rótulos de máquina de escrever. */
+:root {
+  color-scheme: light;
+  --bg: #fcf2d9;        /* papel */
+  --folha: #f0e6d0;     /* painéis */
+  --paper: #fffaf0;     /* cartões */
+  --ink: #292e33;
+  --mute: #7d7a70;
+  --apagado: #c0b9a7;
+  --num: #aca8a3;
+  --line: #e2d9c2;
+  --sel: #ebe2c9;
+  --escuro: #2c363c;
+  --red: #a3341f;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-folha: var(--folha);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-sel: var(--sel);
+  --color-escuro: var(--escuro);
+  --color-red: var(--red);
+  --font-sans: var(--font-corpo), Georgia, serif;
+  --font-serif: var(--font-corpo), Georgia, serif;
+  --font-mono: var(--font-rotulo), ui-monospace, monospace;
+}
+
+@layer base {
+  * { min-width: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--font-corpo), Georgia, serif; overflow-x: clip; -webkit-tap-highlight-color: transparent; }
+  h1, h2, h3 { font-family: var(--font-corpo), Georgia, serif; font-weight: 900; line-height: 1.15; margin: 0; text-wrap: balance; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--escuro); outline-offset: 2px; }
+}
+
+@layer components {
+  .rot { font: 400 11px/1.2 var(--font-rotulo), monospace; letter-spacing: .24em; text-transform: uppercase; color: var(--mute); }
+  .tit { font: 400 30px/1.05 var(--font-titulo), serif; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid #cfc8b6; background: transparent; font: 700 11px/1 var(--font-rotulo), monospace; letter-spacing: .22em; text-transform: uppercase; text-align: center; white-space: nowrap; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn-pri { background: var(--escuro); border-color: var(--escuro); color: #fdf5df; }
+  .btn-perigo { color: var(--red); border-color: #dcb9ad; }
+  .btn-mini { min-height: 36px; padding: 0 14px; font-size: 10px; }
+  .redondo { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 50%; border: 1px solid #cfc8b6; background: transparent; }
+  .redondo svg { width: 22px; height: 22px; }
+  .campo { width: 100%; min-height: 46px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--paper); font-size: 16px; }
+  textarea.campo { line-height: 1.6; resize: vertical; }
+  .rotulo { display: block; font: 400 11px/1.2 var(--font-rotulo), monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--mute); margin: 0 0 6px; }
+  .ajuda { font-size: 13.5px; color: var(--mute); margin: 6px 0 0; }
+  .cartao { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 18px; box-shadow: 0 12px 26px -20px rgba(120, 100, 60, .5); }
+  .aviso { background: var(--folha); border-left: 3px solid var(--escuro); border-radius: 10px; padding: 10px 14px; font-size: 14.5px; }
+  .etiqueta { display: inline-block; font: 400 10px/1 var(--font-rotulo), monospace; letter-spacing: .14em; text-transform: uppercase; padding: 5px 9px; border-radius: 99px; border: 1px solid var(--line); background: var(--folha); white-space: nowrap; }
+  .chip { min-height: 38px; padding: 0 16px; border-radius: 99px; border: 1px solid #cfc8b6; background: transparent; font: 700 10.5px/1 var(--font-rotulo), monospace; letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+  .chip[aria-pressed="true"] { background: var(--escuro); border-color: var(--escuro); color: #fdf5df; }
+  .ocupado { opacity: .6; pointer-events: none; }
+}
+
+/* Ornamento sob os títulos */
+.ornamento { width: 150px; height: 9px; margin: 22px auto 0; background: radial-gradient(ellipse at center, #d9cfb4 0 22%, transparent 70%); border-radius: 50%; position: relative; }
+.ornamento::after { content: ""; position: absolute; inset: 4px -6px auto; height: 1px; background: linear-gradient(90deg, transparent, #d9cfb4 30% 70%, transparent); }
+
+/* Barra de abas inferior */
+.abas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--folha) 94%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
+.abas a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 54px; color: var(--mute); font: 400 9px/1 var(--font-rotulo), monospace; letter-spacing: .12em; text-transform: uppercase; text-decoration: none; border-radius: 14px; }
+.abas svg { width: 23px; height: 23px; }
+.abas a[aria-current="page"] { color: var(--ink); }
+.abas .fab { display: grid; place-items: center; width: 50px; height: 50px; margin-top: -20px; border-radius: 50%; background: var(--escuro); color: #fdf5df; border: 4px solid var(--folha); }
+
+/* Leitura da Bíblia */
+.leitura-biblia { font-family: var(--font-corpo), Georgia, serif; line-height: 1.85; }
+.secao { font-weight: 700; margin: 1.5em 0 .15em; font-size: .98em; line-height: 1.35; }
+.verso { margin: 0; padding: 1px 4px; border-radius: 4px; cursor: pointer; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.verso .n { color: var(--num); font-size: .68em; margin-right: .35em; font-variant-numeric: tabular-nums; }
+.verso i { font-style: italic; opacity: .8; }
+.tem-selecao .verso:not([data-sel]) { color: var(--apagado); }
+.tem-selecao .verso:not([data-sel]) .marca { background: transparent !important; }
+.verso[data-sel] .txt { background: var(--sel); box-shadow: 0 0 0 3px var(--sel); border-radius: 2px; }
+.verso .marca { border-radius: 2px; padding: 1px 0; }
+.verso .tem-nota { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--escuro); margin-left: 5px; vertical-align: middle; }
+.verso[dir="rtl"] { font-family: var(--font-hebraico), "Times New Roman", serif; font-size: 1.25em; line-height: 2; text-align: right; }
+.verso[dir="rtl"] .n { margin: 0 0 0 .4em; font-family: var(--font-corpo), serif; font-size: .5em; }
+.translit, .comparada { margin: 0 4px .5em; font-size: .78em; line-height: 1.5; color: var(--mute); }
+.translit { font-style: italic; }
+.grego { font-family: "Gentium Plus", "Times New Roman", serif; }
+
+/* Folha de escrita à mão */
+.lousa { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; touch-action: pan-y; }
+.lousa canvas { display: block; width: 100%; }
+.lousa[data-ativa="1"] { touch-action: none; }
+.lousa[data-ativa="1"] canvas { cursor: crosshair; }
+.pautas { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 35px, #ece3cc 35px 36px); }
+
+/* Painel que sobe do rodapé */
+.painel { position: fixed; inset: auto 0 0 0; z-index: 40; max-height: 82dvh; overflow: auto; background: var(--folha); border-radius: 28px 28px 0 0; box-shadow: 0 -18px 40px -22px rgba(60, 50, 30, .55); padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); }
+.painel > * { max-width: 720px; margin-left: auto; margin-right: auto; }
+.fundo-painel { position: fixed; inset: 0; z-index: 39; background: rgba(41, 46, 51, .25); }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4a1626">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Púlpito · Minhas Mensagens</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: reverente, sereno, de gabinete pastoral — pouco ruído, muito ar.
+   IDEA: uma Bíblia de estudo encadernada em couro, com fitas marcadoras coloridas.
+   PICTURE: a mesa de trabalho — lombada com os dois módulos, estante de mensagens, página de leitura justificada.
+   COLOUR and TYPE: couro vinho #4a1626 dominante, papel branco, fitas em 6 tons; Spectral + Source Sans 3.
+   LAYOUT: lombada à esquerda; à direita desenvolvedor, estante, leitura ou perfil; no celular, uma vista de cada vez. */
+:root{color-scheme:light dark;
+--bg:light-dark(#f6f2ef,#120e0d);--paper:light-dark(#ffffff,#1c1615);--ink:light-dark(#21171a,#efe6e2);
+--mute:light-dark(#6e6064,#b3a6a2);--line:light-dark(#e7e0e1,#3a2f2c);--leather:#4a1626;--leather2:#5e1f32;
+--gold:#c9a24a;--soft:light-dark(#f8f3f1,#241c1a);--shadow:0 1px 2px #2e0c1714,0 10px 30px -18px #2e0c1759;--r:16px;--wine:light-dark(#4a1626,#d9a3b2)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Spectral,Georgia,serif;font-weight:600;line-height:1.1;margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--paper);padding:0 16px}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.pri{background:var(--leather);color:#fff;border-color:var(--leather);font-weight:600}
+.ai{background:light-dark(#fbf5e6,#2d2516);border-color:var(--gold)}
+.app{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:100vh}
+/* lombada */
+.spine{background:var(--leather);color:#f6eaea;padding:22px 18px;display:flex;flex-direction:column;gap:12px;position:sticky;top:0;height:100vh;overflow:auto}
+.spine h1{font-size:32px;color:#fff}.spine h1 span{color:var(--gold)}
+.spine p.sub{margin:-4px 0 0;color:#d9bfc5;font-size:14px}
+.mods{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;background:#3a1020;border-radius:12px;padding:4px}
+.mods button{border:0;background:transparent;color:#e8d3d8;font-weight:600;padding:0 4px;line-height:1.15;font-size:14.5px}
+.mods button[aria-pressed=true]{background:var(--gold);color:#2a1408}
+.spine input,.spine select{width:100%;min-height:44px;border-radius:10px;border:1px solid #7a3348;background:#3a1020;color:#fff;padding:0 12px;font-size:16px}
+.spine .row{display:flex;gap:8px}
+.spine .new{background:transparent;color:#fff;border:1px dashed var(--gold);font-weight:600;width:100%}
+.list{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
+.list .grp{font:600 15px Spectral,serif;color:var(--gold);padding:12px 4px 2px;border-bottom:1px solid #6a2a3e}
+.list button{width:100%;text-align:start;background:transparent;border:1px solid transparent;color:#f6eaea;padding:9px 12px;height:auto}
+.list button[aria-current=true]{background:var(--leather2);border-color:#8a3a52}
+.list b{display:block;font-family:Spectral,serif;font-size:17px;font-weight:600}
+.list small{color:#d9bfc5;font-size:13px}
+.tag{display:inline-block;font-size:13px;padding:1px 8px;border-radius:99px;background:#ffffff22;margin-inline-start:6px;white-space:nowrap}
+.blv{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px;padding:6px 0}
+.list .blv button{padding:0;min-height:40px;text-align:center;font-size:14px;border:1px solid #6a2a3e;color:#f6eaea}
+.mconta{display:flex;align-items:stretch;gap:6px;background:#3a1020;border:1px solid #6a2a3e;border-radius:14px;padding:6px}
+.mconta .me{flex:1;min-width:0;border-radius:10px;padding:6px 8px}.mconta .me:hover{background:#ffffff14}
+.mconta .me span{flex:1;min-width:0}.mconta .me b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mconta .chev{width:18px;height:18px;flex:none;color:#d9bfc5}
+.msair{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:#f3c6cf;font-size:12.5px;font-weight:600}
+.msair svg{width:20px;height:20px}.msair:hover{background:#ffffff14}
+.foot{margin-top:auto;padding-top:10px;border-top:1px solid #6a2a3e;display:flex;flex-direction:column;gap:6px}
+.me{display:flex;align-items:center;gap:10px;background:transparent;border:0;color:#fff;padding:4px;text-align:start;height:auto}
+.me img{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover}
+.me b{display:block;font-weight:600}.me small{color:#d9bfc5;font-size:13px}
+.sync{font-size:13px;color:#d9bfc5}
+/* área principal */
+.page{padding:clamp(20px,4vw,48px) max(4vw,16px);width:100%}
+.view{max-width:1000px}
+.top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px}
+.top .grow{flex:1 1 120px}
+.status{font-size:13px;color:var(--mute)}
+.lead{font-size:clamp(30px,4vw,44px)}
+/* desenvolvedor vazio */
+.devhome{display:grid;gap:22px;max-width:720px}
+.devhome p{color:var(--mute);margin:8px 0 0;font-size:17px}
+.fontes{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.fonte{border-left:6px solid var(--c);background:var(--soft);border-radius:4px 10px 10px 4px;padding:12px 14px}
+.fonte b{font-family:Spectral,serif;font-size:17px;display:block}
+.fonte span{font-size:14px;color:var(--mute)}
+.rapida{display:grid;gap:14px}
+.rapida input,.rapida select{width:100%;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:10px 12px;font-size:16px}
+.rapida textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:10px 12px;font-size:16px;min-height:80px}
+.rapida details{background:var(--soft);border-radius:10px;padding:12px 14px}.rapida summary{cursor:pointer;font-weight:600;min-height:28px}
+.chk{display:flex;align-items:center;gap:10px;font-weight:400;color:var(--ink);min-height:44px;margin:0}
+.chk input{width:22px;height:22px;min-height:0;accent-color:var(--leather)}
+.orient{background:var(--soft);border-radius:12px;padding:12px 16px;margin-bottom:26px}.orient summary{cursor:pointer;font:600 20px Spectral,serif;min-height:32px}
+.orient label{margin-top:12px}
+.indice{border-top:2px solid var(--gold);padding-top:18px}
+.indice h3{font-size:26px;margin-bottom:12px}.indice h3 small{font:400 15px "Source Sans 3",sans-serif;color:var(--mute)}
+.irow{display:flex;gap:8px;flex-wrap:wrap}.irow input{flex:1 1 240px;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:0 12px;font-size:16px}
+.irow select{flex:0 0 auto;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:0 10px;font-size:16px}
+.iletra{font:600 20px Spectral,serif;color:var(--gold);margin:18px 0 4px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.home{display:grid;gap:24px;max-width:1040px}
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:center;gap:10px;background:linear-gradient(135deg,#6a2338 0%,#4a1626 55%,#2e0c17 100%);color:#fff;border-radius:22px;padding:clamp(22px,4vw,44px);overflow:hidden;box-shadow:0 24px 48px -28px #2e0c17}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:4px;background:linear-gradient(90deg,#7b2d3b,#2f5e8c,#3d6b4f,#8a5a17,#5a3f7a,#1f6b74)}
+.hero h2{font-size:clamp(30px,4.4vw,48px);line-height:1.05;margin:4px 0 10px;color:#fff}
+.hdata{margin:0;color:var(--gold);font-weight:600;font-size:15px}
+.hdata::first-letter{text-transform:uppercase}
+.hsub{margin:0 0 20px;color:#ecd6dc;font-size:17px;max-width:34em}
+.hstats{display:flex;flex-wrap:wrap;gap:8px 26px;margin-bottom:22px}
+.hstats div{font-size:14px;color:#e2c7ce}.hstats b{display:block;font:600 32px/1 Spectral,serif;color:#fff}
+.hbtns{display:flex;flex-wrap:wrap;gap:10px}
+.hb1{background:var(--gold);color:#2a1408;border:0;font-weight:600;min-height:50px;padding:0 22px;font-size:17px}
+.hb2{background:transparent;color:#fff;border:1px solid #ffffff66;min-height:50px;padding:0 20px;font-size:17px}
+.hmenu{background:#ffffff1a;color:#fff;border:1px solid #ffffff40;margin-bottom:14px}
+.hart{width:100%;max-width:340px;justify-self:center;filter:drop-shadow(0 18px 24px #0006)}
+.pcard{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,3.2vw,32px);box-shadow:0 18px 36px -30px #4a1626}
+.chead{margin-bottom:18px}.chead .kick{display:block;font-weight:600;font-size:14px;color:var(--gold)}
+.chead h3{font-size:clamp(26px,3vw,32px);margin:2px 0 6px}.chead p{margin:0;color:var(--mute);font-size:16px;max-width:44em}
+.lnk{min-height:36px;padding:0 6px;border:0;background:none;color:var(--wine);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.fontesBox h3{font-size:20px;margin-bottom:10px}
+.fontesBox summary{cursor:pointer;list-style-position:inside}
+.home .indice{border-top:1px solid var(--line);padding-top:clamp(18px,3.2vw,32px)}
+.ient{display:flex;align-items:stretch;gap:4px;border-bottom:1px dotted var(--line)}
+.ient:hover{background:var(--soft)}
+.iopen{flex:1;display:grid;grid-template-columns:2.6em minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;text-align:start;background:transparent;border:0;border-radius:8px;padding:10px 2px;height:auto}
+.iopen .n{font:600 17px Spectral,serif;color:var(--wine);text-align:right}
+.iopen b{font:600 18px/1.25 Spectral,serif}.iopen .ref{display:block;color:var(--mute);font-size:14px}
+.iopen .d{font-size:13px;color:var(--mute);white-space:nowrap;text-align:right}
+.iopen .hit{grid-column:2/-1;font-size:14px;color:var(--mute)}.iopen .hit em{font-style:normal;font-weight:600;color:var(--ink)}
+.iopen mark{background:light-dark(#f6e3a6,#6b5414);color:inherit;border-radius:3px;padding:0 2px}
+.iact{display:flex;align-items:center;gap:2px;flex:none}
+.ic{width:44px;height:44px;padding:0;display:grid;place-items:center;border:0;background:transparent;color:var(--mute);border-radius:10px}
+.ic svg{width:20px;height:20px}.ic:hover{background:var(--line);color:var(--ink)}.ic.del:hover{color:#a3243b}
+@media(max-width:760px){.hmenu{position:absolute;top:14px;left:14px;z-index:1;margin:0}.hero{grid-template-columns:minmax(0,1fr);padding-top:58px}.hart{max-width:230px;grid-row:1;margin:-6px auto -4px}.hero .htxt{grid-row:2}}
+@media(max-width:520px){.iopen{grid-template-columns:2.2em minmax(0,1fr)}.iopen .d{grid-column:2;text-align:start}.iact{flex-direction:column;justify-content:center}}
+.biblia-v{max-width:860px;padding-bottom:90px}
+.bbar{display:flex;gap:8px;margin-bottom:10px}.bbar .mob{flex:none}
+.bir{display:flex;gap:8px;flex:1}.bir input{flex:1;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:0 12px;font-size:16px}
+.bnav,.bbusca{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.bnav select,.bbusca select,.bbusca input{min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:0 10px;font-size:16px}
+#bLivro{flex:1 1 180px}#bCap,#bVers{flex:0 0 auto;min-width:84px}.bnav .grow{flex:1 1 0}
+.bbusca input{flex:1 1 220px}
+.btexto{font:var(--bfs,20px)/1.8 Spectral,Georgia,serif;margin-top:18px}
+.btexto h2{font-size:clamp(30px,4vw,40px);color:var(--wine);margin:6px 0 2px}
+.btexto .bsub{font:600 15px "Source Sans 3",sans-serif;color:var(--gold);margin:0 0 16px}
+.btexto p.vv{text-align:justify;hyphens:auto;margin:0}
+.v{cursor:pointer;border-radius:4px;padding:1px 0;transition:background .3s;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.v sup{font:600 .58em "Source Sans 3",sans-serif;color:var(--wine);margin:0 3px 0 6px;user-select:none}
+.v.am{background:#f3d36b88}.v.vd{background:#9fd6a399}.v.az{background:#9cc6f099}.v.rs{background:#f2a7c399}
+.v.sel{outline:2px dashed var(--gold);outline-offset:1px}
+.v.flash{background:light-dark(#fff0b3,#5a4710)}
+.v i{font-style:italic}
+.btexto .vb{margin:0 0 14px;text-align:justify;hyphens:auto}
+.com{font:400 .8em/1.55 "Source Sans 3",sans-serif;color:light-dark(#a3241f,#ff8a80);margin:4px 0 0 1.1em;padding-left:10px;border-left:2px solid light-dark(#e8b4b0,#7a2e2a);text-align:justify;hyphens:auto}
+.com b{font-weight:600}
+.com p{margin:0 0 6px}
+.com .prof{margin-top:8px;padding-top:8px;border-top:1px dashed light-dark(#e8b4b0,#7a2e2a)}
+.com .ptit{font-weight:600;font-size:.95em;margin-bottom:6px}
+.gcom{min-height:38px;padding:0 14px;font:600 13.5px "Source Sans 3",sans-serif;color:light-dark(#a3241f,#ff8a80);background:light-dark(#fbefee,#2e1715);border:1px dashed light-dark(#e8b4b0,#7a2e2a);border-radius:99px}
+.com:has(.gcom){border-left-color:transparent;padding-left:0;margin-left:.6em}
+.aprof{min-height:36px;margin-top:4px;padding:0 12px;font:600 13.5px "Source Sans 3",sans-serif;color:light-dark(#a3241f,#ff8a80);background:transparent;border:1px solid light-dark(#e8b4b0,#7a2e2a);border-radius:99px}
+.com.pend{color:var(--mute);border-color:var(--line);font-style:italic}
+.bcomst{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:light-dark(#fbefee,#2e1715);border:1px solid light-dark(#efc9c6,#5a2a27);color:light-dark(#7a1d19,#ffb4ab);border-radius:12px;padding:10px 14px;font-size:15px;margin-top:8px}
+.bcomst span{flex:1 1 220px}
+.seg{display:flex;flex-wrap:wrap;gap:0;border:1px solid light-dark(#a3241f,#ff8a80);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;min-height:44px;padding:0 12px;background:var(--paper);color:light-dark(#a3241f,#ff8a80);font-weight:600;font-size:15px}
+.seg button+button{border-left:1px solid light-dark(#e8b4b0,#7a2e2a)}
+.seg button[aria-pressed=true]{background:light-dark(#a3241f,#ff8a80);color:light-dark(#fff,#2a0d0b)}
+.bctx{border:1px solid var(--line);border-radius:14px;background:var(--soft);padding:10px 14px;margin:4px 0 10px}
+.bctx summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center;color:var(--wine)}
+.bctx form{display:grid;gap:8px;margin-top:8px}.bctx textarea{min-height:80px}.bctx form button{justify-self:start}
+.cand{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+.cand h4{margin:0;font:600 19px Spectral,serif;color:var(--wine)}.cand .tt{font-weight:600;margin:2px 0 4px}
+.cand .mot{color:var(--mute);font-size:15px;margin:0 0 6px}.cand blockquote{margin:0 0 10px;padding-left:12px;border-left:3px solid var(--gold);font:italic 16px/1.6 Spectral,serif}
+.bpag{display:flex;justify-content:space-between;gap:8px;margin:26px 0 10px}
+.bcred{margin-top:18px}
+.bsel{position:fixed;left:50%;bottom:16px;translate:-50% 0;z-index:7;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--leather);color:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 14px 34px -10px #000a;width:min(620px,calc(100vw - 24px))}
+.bsel #bSelInfo{flex:1 1 140px;font-size:14px}
+.bsel .cores{display:flex;gap:6px}
+.cores button{width:34px;height:34px;min-height:34px;padding:0;border-radius:50%;border:2px solid #fff;background:var(--c)}
+.cores .sem{background:transparent;color:#fff;font-size:14px}
+.bsel #bLimpar{background:transparent;color:#fff;border-color:#ffffff66}
+.bsel .pri{background:var(--gold);color:#2a1408;border-color:var(--gold)}
+#bResultados{border:1px solid var(--line);border-radius:14px;padding:6px 14px 12px;margin-top:6px;max-height:60vh;overflow:auto;background:var(--paper)}
+#bResultados h3 button{font:600 15px "Source Sans 3",sans-serif;min-height:40px}
+#bResultados h3{font-size:20px;margin:10px 0 6px;display:flex;gap:8px;align-items:center}#bResultados h3 span{flex:1}
+.res{display:block;width:100%;text-align:start;background:transparent;border:0;border-bottom:1px dotted var(--line);border-radius:0;padding:10px 2px;height:auto;font:16px/1.5 Spectral,serif}
+.res b{font:600 14px "Source Sans 3",sans-serif;color:var(--wine);display:block}
+.res mark{background:light-dark(#f6e3a6,#6b5414);color:inherit;border-radius:3px}
+.res .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.atalhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px}
+.atalho{display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:start;height:auto;min-height:220px;padding:24px;border-radius:20px;border:1px solid var(--line);background:var(--paper);box-shadow:0 18px 36px -30px #4a1626;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.atalho::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--ac)}
+.atalho:hover{transform:translateY(-3px);box-shadow:0 26px 40px -28px #4a1626}
+.atalho .ai1{width:60px;height:60px;border-radius:16px;display:grid;place-items:center;background:var(--acs);color:var(--ac)}
+.atalho .ai1 svg{width:34px;height:34px}
+.atalho b{font:600 26px/1.1 Spectral,serif;margin-top:6px}
+.atalho span{color:var(--mute);font-size:15.5px}
+.atalho em{font-style:normal;font-weight:600;color:var(--ac);margin-top:auto;padding-top:6px}
+.a1{--ac:#a8873a;--acs:light-dark(#f8f0dc,#2f2614)}.a2{--ac:light-dark(#4a1626,#d9a3b2);--acs:light-dark(#f6e9ec,#2c1a1e)}.a3{--ac:light-dark(#1f6b74,#7fc6cf);--acs:light-dark(#e3f1f2,#14282a)}
+@media(prefers-reduced-motion:reduce){.atalho:hover{transform:none}}
+.casa{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--wine);border-color:light-dark(#e3cfd4,#4a2f35);background:var(--soft)}
+.casa svg{width:19px;height:19px;flex:none}
+.conta{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,3vw,28px);margin-top:16px;box-shadow:0 18px 36px -30px #4a1626}
+.chd{display:flex;gap:16px;align-items:center}.chd img{width:68px;height:68px;border-radius:50%;object-fit:cover;flex:none}
+.chd h3{font-size:clamp(24px,3vw,30px);margin:2px 0 4px}.chd p{margin:0;color:var(--mute);font-size:15px}
+.cinfo{list-style:none;margin:18px 0;padding:0;display:grid;gap:12px}
+.cinfo li{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:4px 14px;border-top:1px solid var(--line);padding-top:12px}
+.cinfo b{font-weight:600}.cinfo span{color:var(--mute)}
+@media(max-width:520px){.cinfo li{grid-template-columns:minmax(0,1fr)}}
+.cbtns{display:flex;flex-wrap:wrap;gap:10px}
+.sair{display:inline-flex;align-items:center;gap:8px;color:#a3243b;border-color:light-dark(#efc9c6,#5a2a27);font-weight:600}.sair svg{width:19px;height:19px}
+.expop{display:grid;gap:8px}
+.expop label{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;margin:0;color:var(--ink);font-weight:400}
+.expop label:has(input:checked){border-color:var(--leather);background:var(--soft)}
+.expop input{width:20px;height:20px;margin-top:2px;accent-color:var(--leather);flex:none}
+.expop b{display:block;font-weight:600}.expop small{display:block;color:var(--mute);font-size:14px}
+.abas{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.aba{display:inline-flex;align-items:center;gap:6px;border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;font-weight:600;color:var(--mute);padding:0 14px}
+.aba svg{width:18px;height:18px}.aba[aria-selected=true]{color:var(--wine);border-bottom-color:var(--gold)}
+.vis{display:inline-flex;align-items:center;gap:6px;font-weight:600}.vis svg{width:18px;height:18px}
+.vis.pub{color:light-dark(#1f6b74,#7fc6cf);border-color:light-dark(#9fcfd5,#2c5a60);background:light-dark(#e9f5f6,#14282a)}
+.pubnota{max-width:720px;margin:0 auto 12px;background:light-dark(#e9f5f6,#14282a);color:light-dark(#1f5961,#a9dbe1);border-radius:12px;padding:10px 14px;font-size:15px}
+.tagpub{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:light-dark(#1f6b74,#7fc6cf);margin-left:6px}.tagpub svg{width:13px;height:13px}
+.card .aut{color:var(--wine);font-weight:600;font-size:14px;margin-top:4px}
+.preg{max-width:720px;margin:48px auto 0;border-top:2px solid var(--gold);padding-top:20px;font-family:"Source Sans 3",sans-serif}
+.phead{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.phead h2{font:600 26px Spectral,serif;color:var(--wine);margin:0}.phead p{margin:4px 0 0;color:var(--mute);font-size:15px}
+.plist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.plist>li{display:grid;grid-template-columns:7.5em minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 14px;border-top:1px solid var(--line);background:var(--paper)}
+.plist>li:first-child{border-top:0}
+.pdt b{display:block;font:600 17px Spectral,serif;color:var(--wine);white-space:nowrap}.pdt span{font-size:13px;color:var(--mute)}
+.pcorpo b{display:block;font-weight:600}.pcorpo span{display:block;color:var(--mute);font-size:14px}.pcorpo p{margin:6px 0 0;font-size:15px;text-align:justify}
+.plist>li.ped{display:block;background:var(--soft)}
+.pform{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;background:var(--soft);border-radius:14px;padding:14px;margin-bottom:12px}
+.plist .pform{margin:0;padding:0}
+.pform input,.pform textarea{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:8px 12px;font-size:16px}
+.pbt{display:flex;gap:8px;justify-content:flex-end}
+.ic.conf{width:auto;padding:0 10px;font-size:13px;font-weight:600;color:#a3243b;background:light-dark(#fbefee,#2e1715)}
+@media(max-width:520px){.plist .iact{flex-direction:row}.plist>li{grid-template-columns:minmax(0,1fr) auto}.pdt{grid-column:1}.pcorpo{grid-column:1/-1;grid-row:2}}
+.modo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modo button{height:auto;min-height:64px;text-align:start;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper)}
+.modo b{display:block;font-weight:600}.modo span{display:block;font-size:13.5px;color:var(--mute)}
+.modo button[aria-pressed=true]{border:2px solid var(--leather);background:var(--soft)}
+:root[data-theme=dark] .modo button[aria-pressed=true]{border-color:var(--gold)}
+@media(max-width:420px){.modo{grid-template-columns:1fr}}
+.escolha{font:15px/1.5 "Source Sans 3",sans-serif;background:light-dark(#f8f0dc,#2f2614);border-left:4px solid var(--gold);border-radius:8px;padding:10px 14px;margin:0 0 22px;text-align:justify}
+.escolha b{font-weight:600}
+.sug{margin-top:22px;border-top:2px solid var(--gold);padding-top:18px}
+.sug h3{font-size:clamp(24px,3vw,30px);margin:0 0 4px}.sug>p{margin:0 0 14px;color:var(--mute)}
+.sopts{display:grid;gap:8px}
+.sop{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start;border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;margin:0;color:var(--ink);font-weight:400;background:var(--paper)}
+.sop:has(input:checked){border:2px solid var(--leather);background:var(--soft)}
+:root[data-theme=dark] .sop:has(input:checked){border-color:var(--gold)}
+.sop input{width:20px;height:20px;margin-top:3px;accent-color:var(--leather)}
+.sop .n{font:600 18px Spectral,serif;color:var(--wine)}.sop .top1{font:600 12.5px "Source Sans 3",sans-serif;color:#2a1408;background:var(--gold);border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.sop .tt{display:block;font-weight:600}.sop .mo{display:block;color:var(--mute);font-size:15px}
+.sop q{display:block;grid-column:2;font:italic 15px/1.55 Spectral,serif;color:var(--ink);border-left:3px solid var(--gold);padding-left:10px;margin-top:4px;quotes:none}
+.sbtns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;position:sticky;bottom:0;background:var(--paper);padding:10px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.chipd{min-height:34px;padding:0 12px;border-radius:99px;font-size:13.5px;font-weight:600;color:var(--wine);background:var(--soft);border:1px solid var(--line)}
+.donsbox{background:light-dark(#fbf7ec,#241e12);border:1px solid light-dark(#ecdcb4,#4a3c1c);border-radius:16px;padding:12px 14px}
+.share{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.share svg{width:18px;height:18px;flex:none}
+.top .share:not(.pri){color:var(--wine);border-color:light-dark(#e3cfd4,#4a2f35);background:light-dark(#f6e9ec,#2c1a1e)}
+.sharebar{max-width:720px;margin:18px auto 0;display:flex;flex-wrap:wrap;gap:10px}
+.sharebar .big{flex:1 1 260px;justify-content:center}
+.sharebar #rCopiar2{flex:0 1 auto;min-height:56px;border-radius:16px}
+.offbar{position:sticky;top:0;z-index:8;background:#5a4710;color:#fff;font-size:14px;padding:10px 16px;text-align:center}
+.offbar b{font-weight:700}
+body.offline .ai,body.offline #qGerar,body.offline [data-gcom],body.offline .aprof{opacity:.5}
+@media(max-width:760px){.offbar{position:fixed;left:10px;right:10px;top:max(10px,env(safe-area-inset-top));border-radius:14px;box-shadow:0 10px 24px -10px #000a}}
+textarea.travado{background:var(--soft);color:var(--mute);cursor:not-allowed}
+.big{min-height:56px;font-size:18px;padding:0 26px;justify-self:start}
+/* estante */
+.stats{display:flex;flex-wrap:wrap;gap:10px 28px;margin:14px 0 6px;color:var(--mute)}
+.stats b{display:block;font:600 34px/1 Spectral,serif;color:var(--wine)}
+.shelf{margin-top:30px}
+.shelf h3{font-size:22px;color:var(--wine);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px;display:flex;gap:10px;align-items:baseline}
+.shelf h3 small{font:400 14px "Source Sans 3",sans-serif;color:var(--mute)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{display:block;text-align:start;height:auto;padding:16px 16px 14px;border-radius:4px 12px 12px 4px;border:1px solid var(--line);border-left:6px solid var(--leather);background:var(--paper)}
+.card b{display:block;font:600 19px/1.2 Spectral,serif;margin-bottom:6px}
+.card span{display:block;color:var(--mute);font-size:14px}
+.card em{display:inline-block;font-style:normal;font-size:13px;margin-top:8px;padding:1px 8px;border-radius:99px;background:var(--soft)}
+.vazio{color:var(--mute);padding:30px 0}
+/* editor */
+input.title{width:100%;border:0;border-bottom:2px solid var(--line);background:transparent;font:600 clamp(28px,4vw,44px)/1.1 Spectral,serif;padding:6px 0 10px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0 26px}
+label{display:block;font-size:14px;font-weight:600;color:var(--mute);margin-bottom:4px}
+.meta input,.meta select,textarea,.pt input,.form input,.form select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:10px 12px;font-size:16px}
+textarea{resize:vertical;min-height:96px;line-height:1.55}
+section.blk{margin:0 0 28px}
+section.blk h3{font-size:24px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+section.blk h3 .grow{flex:1}
+.ribbons{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.ribbon{flex:none;border:0;border-radius:10px 10px 0 0;color:#fff;font-weight:600;padding:8px 14px;min-height:48px;opacity:.72}
+.ribbon[aria-selected=true]{opacity:1;padding-bottom:14px}
+.bible{border:2px solid var(--rb);border-radius:0 12px 12px 12px;padding:16px;background:var(--soft)}
+.bible .foco{color:var(--mute);font-size:15px;margin:0 0 12px}
+.bible textarea{min-height:200px}
+.bible .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pt{border-left:4px solid var(--leather);padding:4px 0 4px 14px;margin-bottom:16px}
+.pt .hd{display:flex;gap:8px;margin-bottom:6px}
+.pt .hd span{font:600 22px Spectral,serif;color:var(--wine);width:28px;flex:none;align-self:center}
+.pt .hd input{flex:1;font-weight:600}
+.pt .hd button{flex:none;padding:0 12px}
+.note{font-size:13px;color:var(--mute)}
+.savebar{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 0;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+/* perfil */
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0}
+.idcard{display:flex;gap:14px;align-items:center;background:var(--soft);border-radius:12px;padding:16px;margin-top:16px}
+.idcard img{width:56px;height:56px;border-radius:50%}
+.idcard p{margin:2px 0 0;color:var(--mute);font-size:14px}
+/* leitura */
+.leitura{max-width:720px;margin:0 auto;font:var(--fs,19px)/1.75 Spectral,Georgia,serif}
+.leitura .serie{font:600 15px "Source Sans 3",sans-serif;color:var(--gold)}
+.leitura h1{font-size:clamp(32px,5vw,46px);margin:6px 0 12px;color:var(--wine)}
+.leitura .ref{font-size:1.15em;font-style:italic;margin:0}
+.leitura .info{font:15px "Source Sans 3",sans-serif;color:var(--mute);margin:6px 0 24px}
+.leitura .temaL{border-left:4px solid var(--gold);padding:4px 0 4px 18px;margin:0 0 30px;font-style:italic;font-size:1.1em;text-align:justify}
+.partes{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+.partes button{min-height:40px;border-radius:99px;font:600 15px "Source Sans 3",sans-serif}
+.parte{margin:44px 0 6px;padding-top:22px;border-top:2px solid var(--gold)}
+.parte small{display:block;font:600 14px "Source Sans 3",sans-serif;color:var(--gold)}
+.leitura .parte h2{margin:2px 0 0;font-size:1.7em}
+.leitura .tom p{font-size:1.06em}
+.leitura .biblia{border-left:4px solid var(--leather);padding:2px 0 2px 18px;font-style:italic;margin-bottom:10px}
+:root[data-theme=dark] .leitura .biblia{border-color:var(--gold)}
+.leitura h2{font-size:1.35em;color:var(--wine);margin:34px 0 12px}
+.leitura h3{font-size:1.1em;margin:22px 0 8px}
+.leitura p{text-align:justify;hyphens:auto;-webkit-hyphens:auto;margin:0 0 .85em}
+.leitura .resumo{background:var(--soft);border-radius:12px;padding:6px 22px 14px;margin-top:36px}
+.leitura .resumo ul{margin:0;padding-inline-start:1.1em}
+.leitura .resumo li{text-align:justify;margin-bottom:.4em}
+.leitura .resumo li::marker{color:var(--gold)}
+.leitura .notas{margin-top:44px;border-top:1px solid var(--line);padding-top:8px;font-size:.88em}
+.leitura .notas h3{border-left:5px solid var(--rb);padding-left:10px}
+.fs{display:flex;gap:4px}.fs button{padding:0 12px;font-family:Spectral,serif}
+.toast{position:fixed;bottom:18px;left:50%;translate:-50% 0;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:15px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.dlg{position:fixed;inset:0;background:#0007;display:none;place-items:center;z-index:8;padding:16px}
+.dlg.on{display:grid}
+.dlg>div{background:var(--paper);border-radius:14px;padding:22px;max-width:380px;width:100%}
+.dlg .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.busy{opacity:.6;pointer-events:none}
+[hidden]{display:none!important}
+@media(max-width:760px){
+ .app{grid-template-columns:minmax(0,1fr)}
+ .spine{position:static;height:auto;min-height:100vh}
+ body[data-view=page] .spine{display:none}
+ body[data-view=menu] .page{display:none}
+}
+@media(min-width:761px){.mob{display:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== visual moderno ===== */
+body{-webkit-tap-highlight-color:transparent;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+button{transition:background .15s,border-color .15s,transform .1s,box-shadow .15s}
+button:active{transform:scale(.97)}
+button:not(.pri):not(.ribbon):not(.hb1):not(.hb2):not(.aba):hover{background:var(--soft)}
+.pri{box-shadow:0 6px 16px -8px #4a1626aa}
+.pri:hover{background:var(--leather2)!important}
+input,select,textarea{transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!important;box-shadow:0 0 0 3px #c9a24a33}
+.pcard,.conta,.card,.atalho,.plist,.sop,.cand,.bctx,.orient,#bResultados,.dlg>div{box-shadow:var(--shadow)}
+.pcard,.conta{border-radius:22px}
+.card{border-radius:6px 16px 16px 6px}
+.dlg>div{border-radius:22px}
+.leitura{background:var(--paper);border-radius:22px;padding:clamp(20px,4vw,44px);box-shadow:var(--shadow)}
+.btexto{background:var(--paper);border-radius:22px;padding:clamp(18px,3.5vw,36px);box-shadow:var(--shadow)}
+.view>.lead,.view>h2.lead{letter-spacing:-.01em}
+.abas{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px;width:max-content;max-width:100%}
+.aba{border:0!important;border-radius:10px!important;min-height:40px}
+.aba[aria-selected=true]{background:var(--leather);color:#fff!important}
+:root[data-theme=dark] .aba[aria-selected=true]{background:var(--gold);color:#2a1408!important}
+.toast{border-radius:14px;box-shadow:0 12px 30px -10px #000a;font-weight:600}
+/* barra inferior (celular) */
+.tabbar{display:none}
+@media(max-width:760px){
+ body{font-size:16px}
+ .spine{display:none!important}
+ .page{padding:12px 14px calc(96px + env(safe-area-inset-bottom));padding-top:max(12px,env(safe-area-inset-top))}
+ .mob,.casa,#dMenu,#lMenu,#bMenu,#pbMenu,#verEstante{display:none!important}
+ .top,.bbar{position:sticky;top:0;z-index:6;margin:-12px -14px 12px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+ .top::-webkit-scrollbar{display:none}
+ .top>*{flex:none}.top .grow{flex:1 0 8px}
+ .top button,.top .fs button{min-height:40px;padding:0 12px;border-radius:12px;font-size:15px}
+ .lead{font-size:30px!important}
+ .hero{border-radius:24px;padding:22px 20px 26px;margin-top:4px}
+ .hero h2{font-size:30px}
+ .hsub{font-size:15.5px;margin-bottom:6px}
+ .hart{max-width:170px;margin:-4px auto 0}
+ .atalhos{gap:12px}
+ .atalho{flex-direction:row;align-items:center;min-height:0;padding:16px;gap:14px;border-radius:18px}
+ .atalho::before{inset:0 auto 0 0;width:5px;height:auto}
+ .atalho .ai1{width:52px;height:52px;flex:none;border-radius:14px}
+ .atalho>b{font-size:21px;margin:0}
+ .atalho{display:grid;grid-template-columns:52px minmax(0,1fr);grid-template-rows:auto auto auto}
+ .atalho .ai1{grid-row:1/4}
+ .atalho span:not(.ai1){font-size:14px;grid-column:2}
+ .atalho em{grid-column:2;padding-top:2px;font-size:14px}
+ .pcard,.conta{border-radius:20px;padding:18px 16px}
+ .chead h3{font-size:26px}
+ .rapida input,.rapida select,.rapida textarea,.meta input,.meta select,textarea,.pform input{font-size:16px;border-radius:14px}
+ .modo{grid-template-columns:1fr 1fr}
+ .modo button{padding:10px 12px}
+ .modo span{font-size:12.5px}
+ .big{width:100%;justify-self:stretch;border-radius:16px}
+ .leitura{border-radius:18px;padding:22px 18px;font-size:min(var(--fs,19px),20px)}
+ .leitura h1{font-size:30px}
+ .partes{position:sticky;top:62px;z-index:4;margin:0 -6px 8px;padding:6px;background:var(--paper);border-radius:14px;overflow-x:auto;flex-wrap:nowrap}
+ .partes button{flex:none}
+ .preg{margin-top:28px}
+ .cards{grid-template-columns:minmax(0,1fr)}
+ .irow input{min-height:48px;border-radius:14px}
+ .iopen{padding:12px 2px}
+ .stats{gap:8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .stats div{background:var(--paper);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);font-size:13px}
+ .stats b{font-size:26px}
+ .btexto{border-radius:18px;padding:18px 16px}
+ .bnav{gap:6px}.bnav .grow{display:none}
+ #bLivro{flex:1 1 100%}
+ .seg{width:100%}.seg button{flex:1;padding:0 6px;font-size:14px}
+ .bbusca input{flex:1 1 100%}
+ .bbusca select,.bbusca button{flex:1 1 auto}
+ .bsel{bottom:calc(80px + env(safe-area-inset-bottom));border-radius:18px}
+ .toast{bottom:calc(86px + env(safe-area-inset-bottom))}
+ .savebar{bottom:calc(72px + env(safe-area-inset-bottom));border-radius:16px;padding:10px;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+ .savebar button{flex:1}
+ .sharebar{flex-direction:column}.sharebar>*{flex:none!important;width:100%;justify-content:center}
+ .sbtns{bottom:calc(72px + env(safe-area-inset-bottom))}
+ .dlg{place-items:end stretch;padding:0}
+ .dlg>div{max-width:none!important;border-radius:24px 24px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;animation:subir .22s ease-out}
+ .dlg .row{flex-wrap:wrap}.dlg .row button{flex:1}
+ .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:7;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--paper) 92%,transparent);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);border-top:1px solid var(--line);box-shadow:0 -8px 24px -18px #2e0c1780}
+ .tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;border:0;background:transparent!important;color:var(--mute);font-size:11.5px;font-weight:600;padding:0;border-radius:14px}
+ .tabbar svg{width:24px;height:24px}
+ .tabbar button[aria-current=page]{color:var(--wine)}
+ .tabbar button[aria-current=page]:not(.gerar) svg{background:light-dark(#f3e6ea,#3a2026);border-radius:12px;padding:3px 12px;width:48px;box-sizing:border-box;height:30px}
+ #nova>.top{display:none}
+ .tabbar .gerar[aria-current=page]{color:var(--wine)}
+ .tabbar .gerar span.fab{display:grid;place-items:center;width:52px;height:52px;margin-top:-22px;border-radius:18px;background:linear-gradient(135deg,#6a2338,#4a1626);color:#fff;box-shadow:0 10px 22px -8px #4a1626cc;border:3px solid var(--paper)}
+ .tabbar .gerar span.fab svg{width:26px;height:26px}
+ .tabbar .gerar[aria-current=page] span.fab{background:linear-gradient(135deg,#d6b25a,#b08a35);color:#2a1408}
+}
+@keyframes subir{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.dlg>div{animation:none}button:active{transform:none}}
+</style>
+</head>
+<body data-view="menu">
+<div class="app">
+ <aside class="spine">
+  <h1 data-home style="cursor:pointer" title="Menu inicial">Púlpito<span>.</span></h1>
+  <p class="sub">Desenvolvimento e gestão de mensagens</p>
+  <div class="mods" role="group" aria-label="Módulos">
+   <button id="mDev" aria-pressed="true">Desenvolver</button>
+   <button id="mGest" aria-pressed="false">Mensagens</button>
+   <button id="mBib" aria-pressed="false">Bíblia</button>
+  </div>
+
+  <div id="sDev">
+   <button class="new" id="novo">+ Nova mensagem</button>
+   <ul class="list" id="listaDev" style="margin-top:10px"></ul>
+  </div>
+
+  <div id="sGest" hidden style="display:flex;flex-direction:column;gap:10px">
+   <button class="mob new" id="verEstante">Abrir estante</button>
+   <input id="busca" type="search" placeholder="Buscar título, texto, série…" aria-label="Buscar mensagens">
+   <div class="row">
+    <select id="fStatus" aria-label="Filtrar por situação"><option value="">Todas</option><option>Rascunho</option><option>Pronta</option><option>Pregada</option></select>
+    <select id="ordem" aria-label="Organizar por"><option value="serie">Por série</option><option value="livro">Por livro bíblico</option><option value="data">Por data</option><option value="recentes">Mais recentes</option><option value="titulo">Título A–Z</option></select>
+   </div>
+   <ul class="list" id="lista"></ul>
+  </div>
+
+  <div id="sBib" hidden style="display:flex;flex-direction:column;gap:8px">
+   <p style="margin:4px 0 0;color:#d9bfc5;font-size:14px">Consulte por livro, capítulo e versículo, busque palavras, destaque e copie.</p>
+   <ul class="list" id="bLivrosSpine"></ul>
+  </div>
+
+  <div class="foot">
+   <div class="mconta">
+   <button class="me" id="mePerfil" aria-label="Minha conta e perfil"><img id="meImg" alt=""><span><b id="meNome">Meu perfil</b><small>Perfil e cadastro</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+   <button class="msair" id="meSair" aria-label="Sair da conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/></svg>Sair</button>
+  </div>
+   <div class="sync" id="sync">Carregando…</div>
+  </div>
+ </aside>
+
+ <main class="page">
+  <!-- DESENVOLVEDOR: início -->
+  <div class="view home" id="vDev">
+   <header class="hero">
+    <div class="htxt">
+     <button class="mob hmenu" id="dMenu">☰ Menu</button>
+     <p class="hdata" id="hData"></p>
+     <h2 id="saud">Bem-vindo ao seu gabinete</h2>
+     <p class="hsub">Prepare, organize e compartilhe suas mensagens com a profundidade das Escrituras. Escolha por onde começar.</p>
+
+    </div>
+    <svg class="hart" viewBox="0 0 300 250" aria-hidden="true">
+     <defs><radialGradient id="gl" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#c9a24a" stop-opacity=".45"/><stop offset="1" stop-color="#c9a24a" stop-opacity="0"/></radialGradient></defs>
+     <circle cx="150" cy="120" r="112" fill="url(#gl)"/>
+     <rect x="18" y="38" width="264" height="166" rx="12" fill="#240811"/>
+     <path d="M28 48Q90 34 150 50V196Q90 182 28 192Z" fill="#fbf7f2"/>
+     <path d="M150 50Q210 34 272 48V192Q210 182 150 196Z" fill="#efe8de"/>
+     <g stroke="#d8cdc2" stroke-width="3" stroke-linecap="round"><path d="M44 72h88M168 72h88"/><path d="M44 84h88M168 84h88"/><path d="M44 96h88M168 96h60"/><path d="M44 108h54M168 108h88"/><path d="M44 120h88M168 120h88"/><path d="M44 132h88M168 132h60"/><path d="M44 144h88M168 144h88"/><path d="M44 156h54M168 156h88"/><path d="M44 168h88M168 168h60"/></g>
+     <path d="M150 50V196" stroke="#0000002a" stroke-width="4"/>
+     <path d="M129 46h6v170l-3-6-3 6z" fill="#7b2d3b"/><path d="M136 46h6v182l-3-6-3 6z" fill="#2f5e8c"/><path d="M143 46h6v164l-3-6-3 6z" fill="#3d6b4f"/><path d="M150 46h6v188l-3-6-3 6z" fill="#8a5a17"/><path d="M157 46h6v174l-3-6-3 6z" fill="#5a3f7a"/><path d="M164 46h6v160l-3-6-3 6z" fill="#1f6b74"/>
+    </svg>
+   </header>
+   <nav class="atalhos" aria-label="Módulos">
+    <button class="atalho a1" id="irNova"><span class="ai1"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6h18l8 8v28H12z"/><path d="M30 6v8h8"/><path d="M18 24h12M18 31h8"/><path d="M36 30l-8 8-4 1 1-4 8-8z" fill="currentColor" fill-opacity=".15"/></svg></span><b>Gerar mensagem</b><span>Escreva a passagem e suas orientações; o app desenvolve a mensagem completa.</span><em id="tNova">Começar agora →</em></button>
+    <button class="atalho a2" id="irMsgs"><span class="ai1"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="8" height="32" rx="1.5"/><rect x="19" y="8" width="8" height="32" rx="1.5"/><path d="M30 10.5l7.6-2 8.2 30.8-7.6 2z"/><path d="M8 16h8M19 16h8M8 32h8M19 32h8"/></svg></span><b>Mensagens</b><span>Índice, busca, leitura justificada, PDF, editar e apagar.</span><em id="tMsgs"></em></button>
+    <button class="atalho a3" id="irBiblia"><span class="ai1"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 12c-4-3-10-4-16-3v28c6-1 12 0 16 3 4-3 10-4 16-3V9c-6-1-12 0-16 3z"/><path d="M24 12v28"/><path d="M29 9v14l3-2 3 2V8.5"/></svg></span><b>Bíblia</b><span>Livro, capítulo e versículo, busca, destaques e comentários das fontes.</span><em id="tBib">Abrir a Bíblia →</em></button>
+   </nav>
+
+
+
+  </div>
+
+  <!-- DESENVOLVEDOR: nova mensagem -->
+  <div class="view" id="vNova" hidden style="max-width:1040px">
+   <section class="pcard" id="nova">
+    <div class="top"><button type="button" class="casa" id="nVoltar" data-home aria-label="Voltar ao menu inicial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Início</button></div>
+    <div class="chead"><span class="kick">Desenvolvedor</span><h3>Nova mensagem</h3><p>Escreva a passagem e as suas orientações. O app identifica e transcreve os textos bíblicos e desenvolve a mensagem em três partes: tópicos, resumida e completa.</p></div>
+   <form class="rapida" id="fRapida">
+    <div class="modo" role="group" aria-label="Como começar"><button type="button" data-qm="pass" aria-pressed="true"><b>Tenho a passagem</b><span>Eu informo o texto bíblico</span></button><button type="button" data-qm="ctx" aria-pressed="false"><b>Partir de um contexto</b><span>O app escolhe a passagem adequada</span></button></div>
+    <div id="qPassBox"><label for="qTexto">Passagem bíblica *</label><input id="qTexto" required placeholder="Ex.: 1 Reis 18:41-46"></div>
+    <div id="qCtxBox" hidden><label for="qContexto">Contexto da mensagem *</label><textarea id="qContexto" style="min-height:120px" placeholder="Ex.: culto de Santa Ceia; a igreja atravessa lutas e desânimo; quero falar de perseverança na fé, da fidelidade de Deus e da preparação para a volta do Senhor."></textarea><p class="note" style="margin:6px 0 0">Descreva a ocasião, o público e o que Deus colocou no seu coração. O app sugere 10 passagens adequadas para você escolher, ou escolhe sozinho.</p>
+     <label class="chk" style="margin-top:6px"><input type="checkbox" id="qAuto"> Escolha automática: o app decide a passagem e já desenvolve a mensagem</label></div>
+    <div><label for="qDescricao">Descrição da mensagem</label><textarea id="qDescricao" placeholder="Sobre o que é a mensagem, em poucas palavras."></textarea></div>
+    <div><label for="qComentarios">Comentários</label><textarea id="qComentarios" placeholder="Observações, o que Deus falou ao seu coração, detalhes que não podem faltar."></textarea></div>
+    <div><label for="qLinha">Linha de desenvolvimento</label><textarea id="qLinha" placeholder="Ex.: 1) a oração perseverante de Elias; 2) a nuvem do tamanho da mão; 3) a chuva abundante."></textarea></div>
+    <div class="donsbox"><label for="qDons">Dons espirituais que direcionam o culto <span style="font-weight:400">(opcional)</span></label>
+     <div class="chips" data-alvo="qDons"><button type="button" class="chipd" data-dom="Revelação">+ Revelação</button><button type="button" class="chipd" data-dom="Profecia">+ Profecia</button><button type="button" class="chipd" data-dom="Visão">+ Visão</button><button type="button" class="chipd" data-dom="Sonho">+ Sonho</button><button type="button" class="chipd" data-dom="Palavra de sabedoria">+ Palavra de sabedoria</button><button type="button" class="chipd" data-dom="Palavra de ciência">+ Palavra de ciência</button><button type="button" class="chipd" data-dom="Discernimento">+ Discernimento</button><button type="button" class="chipd" data-dom="Línguas e interpretação">+ Línguas e interpretação</button></div>
+     <textarea id="qDons" placeholder="Ex.: Revelação: o Senhor quer restaurar a vida de oração do seu povo. Visão: uma lâmpada se apagando e sendo acesa de novo."></textarea>
+     <p class="note" style="margin:6px 0 0">Informe o que o Senhor falou pelos dons para este culto. A mensagem será alinhada a essa direção, sempre conferida com a Palavra.</p></div>
+    <div><label for="qObjetivos">Objetivos</label><textarea id="qObjetivos" placeholder="O que os ouvintes devem entender, sentir e decidir."></textarea></div>
+    <div><label for="qAplic">Aplicações</label><textarea id="qAplic" placeholder="Aplicações práticas e proféticas que você quer destacar."></textarea></div>
+    <label class="chk"><input type="checkbox" id="qRelato" checked> Incluir o relato (a história do texto)</label>
+    <details><summary>Mais opções (tipo, série, data, local)</summary>
+     <div class="meta" style="margin:12px 0 0">
+      <div><label for="qTipo">Tipo de sermão</label><select id="qTipo"><option>Expositivo</option><option>Temático</option><option>Textual</option><option>Biográfico</option><option>Evangelístico</option></select></div>
+      <div><label for="qSerie">Série / assunto</label><input id="qSerie" list="series"></div>
+      <div><label for="qData">Data</label><input id="qData" type="date"></div>
+      <div><label for="qLocal">Local / ocasião</label><input id="qLocal" placeholder="Culto de domingo"></div>
+      <div><label for="qPublico">Público</label><input id="qPublico" placeholder="Igreja, jovens…"></div>
+     </div>
+    </details>
+    <button class="pri big" type="submit" id="qGerar">✦ Desenvolver mensagem completa</button>
+    <p class="note" id="qStatus">Leva cerca de um minuto. Você revisa o resultado antes de salvar.</p>
+   </form>
+   <section class="sug" id="qSug" hidden aria-live="polite"></section>
+    <p class="note" style="margin:14px 0 0">Prefere montar parte por parte? <button type="button" id="novo2" class="lnk">Abrir editor completo</button></p>
+   </section>
+   <div style="margin-top:24px"><details class="fontesBox pcard"><summary><h3 style="display:inline">Fontes consultadas</h3> <span class="note" id="fontesN"></span></summary><div class="fontes" id="fontesInfo" style="margin-top:12px"></div></details></div>
+  </div>
+
+  <!-- GESTÃO: estante -->
+  <div class="view" id="vLib" hidden>
+   <div class="top"><button type="button" class="casa" data-home aria-label="Voltar ao menu inicial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Início</button><button id="lMenu" class="mob">☰ Menu</button></div>
+   <div class="abas" role="tablist"><button role="tab" aria-selected="true" class="aba" data-aba-m="minhas">Minhas mensagens</button><button role="tab" aria-selected="false" class="aba" data-aba-m="pub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Públicas</button></div>
+   <h2 class="lead">Minhas mensagens</h2>
+
+   <div class="stats" id="stats"></div>
+   <section class="pcard indice" style="margin-top:18px" id="indice" aria-labelledby="iTit">
+    <div class="chead"><span class="kick">Localizar</span><h3 id="iTit">Índice das mensagens <small id="iCount"></small></h3></div>
+    <div class="irow">
+     <input id="iBusca" type="search" placeholder="Localizar: palavra, passagem, personagem, tema…" aria-label="Localizar nas mensagens">
+     <select id="iOrdem" aria-label="Ordenar índice"><option value="az">A–Z</option><option value="livro">Livro bíblico</option><option value="data">Data</option></select>
+    </div>
+    <p class="note" id="iInfo"></p>
+    <div id="iLista"></div>
+   </section>
+   <div id="estante"></div>
+  </div>
+
+  <!-- GESTÃO: públicas -->
+  <div class="view" id="vPub" hidden>
+   <div class="top"><button type="button" class="casa" data-home aria-label="Voltar ao menu inicial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Início</button><button id="pbMenu" class="mob">☰ Menu</button></div>
+   <div class="abas" role="tablist"><button role="tab" aria-selected="false" class="aba" data-aba-m="minhas">Minhas mensagens</button><button role="tab" aria-selected="true" class="aba" data-aba-m="pub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Públicas</button></div>
+   <h2 class="lead">Mensagens públicas</h2>
+   <p class="note" style="font-size:15px;margin:6px 0 16px">Mensagens que os usuários do app decidiram compartilhar. Todos podem ler, copiar e exportar; só o autor pode editar ou apagar.</p>
+   <div class="irow"><input id="pbBusca" type="search" placeholder="Buscar por título, passagem, série ou autor…" aria-label="Buscar mensagens públicas"></div>
+   <p class="note" id="pbInfo"></p>
+   <div id="pbLista" class="cards" style="margin-top:12px"></div>
+  </div>
+
+  <!-- GESTÃO: leitura -->
+  <div class="view" id="vRead" hidden>
+   <div class="top">
+    <button type="button" class="casa" data-home aria-label="Voltar ao menu inicial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Início</button><button id="rVoltar">← Mensagens</button><button id="rPdf" class="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Compartilhar PDF</button><span class="grow"></span>
+    <div class="fs"><button id="fsMenos" aria-label="Diminuir letra">A−</button><button id="fsMais" aria-label="Aumentar letra">A+</button></div>
+    <button id="rVis" class="vis" hidden></button><button id="rCopiar">Copiar</button><button class="pri" id="rSalvar" hidden>Salvar mensagem</button><button id="rApagar">Apagar</button><button class="pri" id="rEditar">Editar</button>
+   </div>
+   <p class="pubnota" id="rPubNota" hidden></p>
+   <article class="leitura" id="leitura"></article>
+   <div class="sharebar"><button type="button" class="pri share big" id="rPdf2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Compartilhar em PDF</button><button type="button" id="rCopiar2">Copiar texto</button></div>
+  </div>
+
+  <!-- DESENVOLVEDOR: editor -->
+  <div class="view" id="vEdit" hidden>
+   <div class="top">
+    <button type="button" class="casa" data-home aria-label="Voltar ao menu inicial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Início</button><button id="eVoltar">← Voltar</button>
+    <span class="status grow" id="salvo"></span>
+    <button id="excluir">Apagar</button>
+   </div>
+   <input class="title" id="titulo" placeholder="Título da mensagem" aria-label="Título">
+   <details class="orient" id="orient"><summary>Orientações da mensagem</summary>
+    <label for="contexto">Contexto</label><textarea id="contexto" style="min-height:64px"></textarea>
+    <label for="descricao">Descrição</label><textarea id="descricao" style="min-height:64px"></textarea>
+    <label for="comentarios">Comentários</label><textarea id="comentarios" style="min-height:64px"></textarea>
+    <label for="linha">Linha de desenvolvimento</label><textarea id="linha" style="min-height:64px"></textarea>
+    <label for="dons">Dons espirituais que direcionam o culto</label><div class="chips" data-alvo="dons"><button type="button" class="chipd" data-dom="Revelação">+ Revelação</button><button type="button" class="chipd" data-dom="Profecia">+ Profecia</button><button type="button" class="chipd" data-dom="Visão">+ Visão</button><button type="button" class="chipd" data-dom="Sonho">+ Sonho</button><button type="button" class="chipd" data-dom="Palavra de sabedoria">+ Palavra de sabedoria</button><button type="button" class="chipd" data-dom="Palavra de ciência">+ Palavra de ciência</button><button type="button" class="chipd" data-dom="Discernimento">+ Discernimento</button><button type="button" class="chipd" data-dom="Línguas e interpretação">+ Línguas e interpretação</button></div><textarea id="dons" style="min-height:64px"></textarea>
+    <label for="objetivos">Objetivos</label><textarea id="objetivos" style="min-height:64px"></textarea>
+    <label for="aplicDesej">Aplicações desejadas</label><textarea id="aplicDesej" style="min-height:64px"></textarea>
+   </details>
+   <div class="meta">
+    <div><label for="texto">Texto-base</label><input id="texto" placeholder="Ex.: João 15:1-8"></div>
+    <div><label for="serie">Série / assunto</label><input id="serie" list="series" placeholder="Ex.: Fruto do Espírito"><datalist id="series"></datalist></div>
+    <div><label for="tipo">Tipo de sermão</label><select id="tipo"><option>Expositivo</option><option>Temático</option><option>Textual</option><option>Biográfico</option><option>Evangelístico</option></select></div>
+    <div><label for="status">Situação</label><select id="status"><option>Rascunho</option><option>Pronta</option><option>Pregada</option></select></div>
+    <div><label for="data">Data</label><input id="data" type="date"></div>
+    <div><label for="local">Local / ocasião</label><input id="local" placeholder="Culto de domingo"></div>
+    <div><label for="publico">Público</label><input id="publico" placeholder="Igreja, jovens…"></div>
+   </div>
+
+   <section class="blk">
+    <h3><span class="grow">Leitura bíblica</span><button class="ai" id="gLeitura">✦ Transcrever texto-base</button></h3>
+    <textarea id="leituraBib" placeholder="O texto-base transcrito, versículo por versículo, para ser lido no início da mensagem." style="min-height:120px"></textarea>
+   </section>
+
+   <section class="blk">
+    <h3><span class="grow">Relato do texto bíblico</span><button class="ai" id="gRelato">✦ Gerar relato</button></h3>
+    <label style="display:flex;align-items:center;gap:10px;font-weight:400;color:var(--ink);min-height:44px;margin:0 0 6px"><input type="checkbox" id="incluirRelato" style="width:22px;height:22px;accent-color:var(--leather)"> Incluir o relato (a história do texto) na mensagem</label>
+    <textarea id="relato" placeholder="A história narrada: personagens, lugar, época, costumes e o que aconteceu." style="min-height:140px"></textarea>
+   </section>
+
+   <section class="blk">
+    <h3><span class="grow">Tema central</span><button class="ai" id="gerar">✦ Desenvolver esboço com as fontes</button></h3>
+    <textarea id="tema" placeholder="Qual é a grande verdade desta mensagem, em uma frase?" style="min-height:64px"></textarea>
+    <p class="note">O esboço gerado preenche só os campos vazios — o que você já escreveu é mantido.</p>
+   </section>
+
+   <section class="blk">
+    <h3>Estudo nas fontes</h3>
+    <div class="ribbons" role="tablist" id="fitas"></div>
+    <div class="bible" id="painel" role="tabpanel">
+     <p class="foco" id="foco"></p>
+     <label for="nota" id="notaLbl">Minhas anotações</label>
+     <textarea id="nota" placeholder="Anote aqui o que você leu nesta fonte para o texto-base."></textarea>
+     <div class="acts"><button class="ai" id="perspectiva">✦ Sugerir estudo nesta linha</button></div>
+     <p class="note">As sugestões seguem a linha de estudo característica de cada obra, em palavras próprias — não são as notas impressas. Confira sempre no seu exemplar.</p>
+    </div>
+   </section>
+
+   <section class="blk"><h3>Introdução</h3><textarea id="intro"></textarea></section>
+   <section class="blk"><h3><span class="grow">Pontos da mensagem</span><button id="addPt">+ Ponto</button></h3><div id="pontos"></div></section>
+   <section class="blk"><h3><span class="grow">Ilustrações</span><button class="ai" id="ilus">✦ Sugerir</button></h3><textarea id="ilustracoes"></textarea></section>
+   <section class="blk"><h3>Aplicação</h3><textarea id="aplicacao"></textarea></section>
+   <section class="blk"><h3><span class="grow">Aplicação profética</span><button class="ai" id="gProf">✦ Desenvolver</button></h3><textarea id="profetica" placeholder="O que este texto revela para a Igreja nesta última hora: preparo da Noiva, sinais dos tempos, a volta do Senhor."></textarea></section>
+   <section class="blk"><h3>Conclusão e apelo</h3><textarea id="conclusao"></textarea></section>
+   <section class="blk"><h3><span class="grow">Resumo em tópicos</span><button class="ai" id="gTopicos">✦ Gerar tópicos</button></h3><textarea id="topicos" placeholder="Um tópico por linha — aparecem como marcadores na Parte 1 do arquivo."></textarea></section>
+   <section class="blk"><h3><span class="grow">Mensagem resumida</span><button class="ai" id="gResumida">✦ Gerar resumida</button></h3><textarea id="resumida" placeholder="Versão curta e vibrante, para uma breve leitura antes da pregação." style="min-height:160px"></textarea></section>
+
+   <div class="savebar"><button id="eLer">Ver formatada</button><button class="pri" id="salvar">Salvar mensagem</button></div>
+  </div>
+
+  <!-- BÍBLIA -->
+  <div class="view biblia-v" id="vBiblia" hidden>
+   <div class="bbar">
+    <button type="button" class="casa" data-home aria-label="Voltar ao menu inicial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Início</button><button class="mob" id="bMenu">☰</button>
+    <form id="bIr" class="bir"><input id="bRef" placeholder="Ir para: Jo 3:16, Salmos 23, 1Co 13:4-7" aria-label="Ir para referência"><button class="pri" type="submit">Ir</button></form>
+   </div>
+   <div class="bnav">
+    <select id="bLivro" aria-label="Livro"></select>
+    <select id="bCap" aria-label="Capítulo"></select>
+    <select id="bVers" aria-label="Versículo"></select>
+    <span class="grow"></span>
+    <div class="seg" id="bComTog" role="group" aria-label="Comentários"><button type="button" data-m="res">Resumidos</button><button type="button" data-m="comp">Completos</button><button type="button" data-m="off">Sem comentários</button></div>
+    <div class="fs"><button id="bMenos" aria-label="Diminuir letra">A−</button><button id="bMais" aria-label="Aumentar letra">A+</button></div>
+   </div>
+   <form id="bBuscaF" class="bbusca">
+    <input id="bBusca" type="search" placeholder="Buscar no texto: “pastor”, “fé esperança”, “filho do homem”" aria-label="Buscar palavras na Bíblia">
+    <select id="bEscopo" aria-label="Onde buscar"><option value="all">Toda a Bíblia</option><option value="at">Antigo Testamento</option><option value="nt">Novo Testamento</option><option value="livro">Livro atual</option></select>
+    <button type="submit">Buscar</button>
+    <button type="button" id="bVerDest">Meus destaques</button>
+   </form>
+   <details class="bctx" id="bCtx">
+    <summary>✦ Encontrar passagem pelo contexto</summary>
+    <form id="bCtxF">
+     <label for="bCtxTxt">Descreva o que você lembra da passagem</label>
+     <textarea id="bCtxTxt" placeholder="Ex.: quando Jesus acalmou a tempestade no mar; o profeta que viu um vale de ossos secos; Paulo falando da armadura de Deus"></textarea>
+     <button class="pri" type="submit" id="bCtxBtn">Identificar passagem</button>
+    </form>
+    <div id="bCtxRes"></div>
+   </details>
+   <div id="bResultados" hidden></div>
+   <div class="bcomst" id="bComSt" hidden></div>
+   <article class="btexto" id="bTexto"><p class="note">Carregando a Bíblia…</p></article>
+   <div class="bpag"><button id="bAnt">← Capítulo anterior</button><button id="bProx">Próximo capítulo →</button></div>
+   <p class="note bcred">Texto: Bíblia Livre (BLIVRE), revisão de 2018 da tradução de João Ferreira de Almeida de 1819 (Textus Receptus). © 2018 Diego Santos, Mario Sérgio e Marco Teles — licença Creative Commons Atribuição 4.0 Brasil. Palavras entre colchetes no original aparecem em itálico.</p>
+   <div class="bsel" id="bSel" hidden>
+    <span id="bSelInfo"></span>
+    <div class="cores" role="group" aria-label="Destacar">
+     <button data-cor="am" style="--c:#f3d36b" aria-label="Destacar em amarelo"></button><button data-cor="vd" style="--c:#9fd6a3" aria-label="Destacar em verde"></button><button data-cor="az" style="--c:#9cc6f0" aria-label="Destacar em azul"></button><button data-cor="rs" style="--c:#f2a7c3" aria-label="Destacar em rosa"></button><button data-cor="" class="sem" aria-label="Remover destaque">✕</button>
+    </div>
+    <button class="pri" id="bCopiar">Copiar</button><button id="bLimpar">Limpar</button>
+   </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="view" id="vPerfil" hidden>
+   <div class="top"><button type="button" class="casa" data-home aria-label="Voltar ao menu inicial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Início</button><button id="pVoltar">← Voltar</button></div>
+   <h2 class="lead" id="pTit">Meu perfil</h2>
+   <section class="conta" aria-labelledby="cTit">
+    <div class="chd"><img id="pImg" alt=""><div><span class="kick" style="color:var(--gold);font-weight:600;font-size:14px">Minha conta</span><h3 id="cTit"><span id="pConta">Sua conta</span></h3><p id="cEstado"></p></div></div>
+    <ul class="cinfo">
+     <li><b>Login e senha</b><span>Guardados pela sua conta do Claude — entrada por e-mail ou pelo botão “Continuar com Google”.</span></li>
+     <li><b>Seu conteúdo</b><span id="cConteudo"></span></li>
+     <li><b>Privacidade</b><span>Cada usuário tem a própria conta. Suas mensagens, seu cadastro e seus destaques são visíveis só para você.</span></li>
+    </ul>
+    <div class="cbtns"><button type="button" id="cTrocar">Entrar com outra conta</button><button type="button" class="sair" id="cSair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/></svg>Sair da conta</button></div>
+   </section>
+   <section class="conta" id="bkBox" aria-labelledby="bkTit">
+    <span class="kick" style="color:var(--gold);font-weight:600;font-size:14px">Cópia de segurança</span>
+    <h3 id="bkTit" style="font-size:clamp(22px,3vw,28px);margin:2px 0 6px">Guardar e restaurar minhas mensagens</h3>
+    <p class="note" style="font-size:15px;margin:0 0 10px">Baixe um arquivo com todas as suas mensagens, cadastro e destaques. Use-o para passar para outro celular ou recuperar o conteúdo — ao restaurar, nada do que você já tem é apagado.</p>
+    <div class="cbtns"><button type="button" class="pri share" id="bkBaixar">Baixar cópia de segurança</button><label style="display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:10px;cursor:pointer;margin:0;border:1px solid var(--line);background:var(--paper);font-weight:600">Restaurar cópia<input type="file" id="bkArq" accept=".json,application/json" hidden></label></div>
+    <p class="note" id="bkProg" style="margin:8px 0 0"></p>
+   </section>
+   <section class="conta" id="offBox" aria-labelledby="offTit">
+    <span class="kick" style="color:var(--gold);font-weight:600;font-size:14px">Sem internet</span>
+    <h3 id="offTit" style="font-size:clamp(22px,3vw,28px);margin:2px 0 6px">Levar as mensagens para usar offline</h3>
+    <p class="note" style="font-size:15px;margin:0 0 10px">Gera um arquivo que abre no celular mesmo sem internet, com todas as suas mensagens formatadas (tópicos, resumida e completa) e, se quiser, a Bíblia completa. Guarde-o em Arquivos (iPhone) ou Downloads (Android). Gere de novo sempre que quiser atualizar.</p>
+    <label class="chk"><input type="checkbox" id="offBib" checked> Incluir a Bíblia completa (o arquivo fica com cerca de 5 MB)</label>
+    <div class="cbtns" style="margin-top:10px"><button type="button" class="pri share" id="offGerar">Baixar pacote offline</button></div>
+    <p class="note" id="offProg" style="margin:8px 0 0"></p>
+   </section>
+   <section class="conta" id="acvBox" aria-labelledby="acvTit">
+    <span class="kick" style="color:var(--gold);font-weight:600;font-size:14px">Fonte de pesquisa</span>
+    <h3 id="acvTit" style="font-size:clamp(22px,3vw,28px);margin:2px 0 6px">Acervo de estudo (apostilas da ICM)</h3>
+    <p class="note" style="font-size:15px;margin:0 0 10px">As apostilas que você importar são usadas como fonte de pesquisa: ao gerar uma mensagem, sugerir passagens ou desenvolver a aplicação profética, o app busca os trechos sobre o mesmo texto e tema e segue a linha de pensamento delas. O acervo fica só na sua conta e não é usado nos comentários da Bíblia.</p>
+    <p id="acvStatus" style="font-weight:600;margin:0 0 10px">Nenhum acervo importado.</p>
+    <label class="chk"><input type="checkbox" id="acvUsar" checked> Usar o acervo ao gerar mensagens</label>
+    <div class="cbtns" style="margin-top:10px"><label class="pri" style="display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:10px;cursor:pointer;margin:0;color:#fff;font-weight:600">Importar arquivo do acervo<input type="file" id="acvArq" accept=".gz,.json,application/gzip,application/json,application/octet-stream" hidden></label><button type="button" id="acvRemover" hidden>Remover acervo</button></div>
+    <p class="note" id="acvProg" style="margin:8px 0 0"></p>
+   </section>
+   <h3 style="font-size:24px;margin:28px 0 0">Cadastro</h3>
+   <form class="form" id="fPerfil">
+    <div><label for="pfNome">Nome para exibição</label><input id="pfNome" placeholder="Ex.: Pr. João Silva"></div>
+    <div><label for="pfCargo">Perfil</label><select id="pfCargo" required><option value="">Selecione…</option><option>Pastor</option><option>Ungido</option><option>Diácono</option><option>Obreiro</option><option>Jovem</option><option>Senhora</option><option>Outros</option></select></div>
+    <div><label for="pfIgreja">Igreja</label><input id="pfIgreja"></div>
+    <div><label for="pfDenom">Denominação</label><input id="pfDenom"></div>
+    <div><label for="pfCidade">Cidade / UF</label><input id="pfCidade"></div>
+    <div><label for="pfVersao">Versão bíblica das citações</label><input id="pfVersao" placeholder="Almeida Revista e Corrigida (ARC)"></div>
+    <div style="grid-column:1/-1"><label for="pfDoutrina">Linha doutrinária do aplicativo</label><textarea id="pfDoutrina" style="min-height:170px"></textarea><p class="note" id="pfDoutNota">Todas as mensagens geradas seguem esta linha.</p></div>
+    <div style="grid-column:1/-1"><button class="pri" type="submit">Salvar cadastro</button></div>
+   </form>
+  </div>
+ </main>
+</div>
+<div class="offbar" id="offbar" hidden role="status"><b>Sem internet.</b> Você pode ler, editar e consultar a Bíblia; tudo fica salvo neste aparelho e sincroniza quando a conexão voltar. Gerar mensagens e comentários precisa de internet.</div>
+<nav class="tabbar" aria-label="Navegação">
+ <button data-tab="inicio" aria-label="Início"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Início</span></button>
+ <button data-tab="msgs" aria-label="Mensagens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Mensagens</span></button>
+ <button data-tab="gerar" class="gerar" aria-label="Gerar mensagem"><span class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span>Gerar</span></button>
+ <button data-tab="biblia" aria-label="Bíblia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6c-2.5-2-6-2.5-9-2v15c3-.5 6.5 0 9 2 2.5-2 6-2.5 9-2V4c-3-.5-6.5 0-9 2z"/><path d="M12 6v15"/></svg><span>Bíblia</span></button>
+ <button data-tab="perfil" aria-label="Meu perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Perfil</span></button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+<div class="dlg" id="dlgSair"><div style="max-width:440px"><h3 style="font-size:22px" id="sTit">Sair da conta</h3><p>Seu login é feito pela sua conta do Claude. Para sair:</p><ol style="padding-left:1.2em;margin:0 0 8px"><li>Abra o menu da sua conta no Claude — toque na sua foto ou no seu nome.</li><li>Escolha <b>Sair</b> (ou “Log out”).</li></ol><p id="sExtra">Para entrar com outra pessoa, saia e entre de novo com o e-mail dela ou com “Continuar com Google”. Cada conta abre o Púlpito com o próprio conteúdo.</p><p class="note">Tudo o que você criou continua salvo na sua conta e volta quando você entrar de novo.</p><div class="row"><button class="pri" id="sOk">Entendi</button></div></div></div>
+<div class="dlg" id="dlgExp"><div style="max-width:460px"><h3 style="font-size:22px" id="eTit">Compartilhar mensagem</h3><p style="margin:6px 0 12px;color:var(--mute)">Escolha o que vai no arquivo:</p>
+ <div class="expop" role="radiogroup" aria-label="Conteúdo">
+  <label><input type="radio" name="expSel" value="tudo" checked><span><b>Mensagem completa</b><small>As três partes: tópicos, resumida e longa</small></span></label>
+  <label><input type="radio" name="expSel" value="topicos"><span><b>Só os tópicos</b><small>Os bullet points da mensagem</small></span></label>
+  <label><input type="radio" name="expSel" value="resumida"><span><b>Só a mensagem curta</b><small>A versão resumida para leitura antes da pregação</small></span></label>
+  <label><input type="radio" name="expSel" value="longa"><span><b>Só a mensagem longa</b><small>A mensagem desenvolvida com todos os detalhes</small></span></label>
+ </div>
+ <div class="row" style="flex-wrap:wrap"><button id="eCancel">Cancelar</button><button id="eCopiar">Copiar texto</button><button class="pri share" id="ePdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Compartilhar PDF</button></div></div></div>
+<div class="dlg" id="dlgVis"><div style="max-width:460px"><h3 style="font-size:22px">Quem pode ver esta mensagem?</h3>
+ <div class="expop" role="radiogroup" aria-label="Visibilidade" style="margin-top:12px">
+  <label><input type="radio" name="visSel" value="privada"><span><b>Privada</b><small>Só você vê, no seu perfil.</small></span></label>
+  <label><input type="radio" name="visSel" value="publica"><span><b>Pública</b><small>Todos os usuários do app podem ler, copiar e exportar. Ninguém além de você pode editar ou apagar.</small></span></label>
+ </div>
+ <p class="note" id="visAviso" style="margin:10px 0 0"></p>
+ <div class="row"><button id="visCancel">Cancelar</button><button class="pri" id="visOk">Salvar</button></div></div></div>
+<div class="dlg" id="dlg"><div><h3 style="font-size:22px" id="dlgTit">Apagar esta mensagem?</h3><p>Ela será removida permanentemente da sua conta.</p><div class="row"><button id="nao">Cancelar</button><button class="pri" id="sim" style="background:#a3243b;border-color:#a3243b">Apagar</button></div></div></div>
+
+<script>
+{
+const FONTES=[
+ {k:'holman',n:'King James 1611 · Holman',c:'#7b2d3b',f:'Texto da King James 1611 com notas de estudo Holman: contexto histórico, explicação versículo a versículo, termos do hebraico e do grego e aplicação prática.'},
+ {k:'thompson',n:'Thompson',c:'#2f5e8c',f:'Sistema de referências em cadeia: segue cada tema pela Bíblia inteira, com estudos de personagens, tópicos e esboços analíticos dos livros.'},
+ {k:'nelson',n:'Thomas Nelson',c:'#3d6b4f',f:'Notas explicativas e panorama de cada livro, estudos de palavras e contexto cultural, geográfico e arqueológico.'},
+ {k:'scofield',n:'Scofield',c:'#8a5a17',f:'Leitura dispensacionalista: alianças e dispensações, tipologia, profecia e referências em série que definem as grandes doutrinas.'},
+ {k:'shedd',n:'Shedd',c:'#5a3f7a',f:'Perspectiva evangélica conservadora, com notas teológicas e pastorais pensadas para o leitor brasileiro.'},
+ {k:'wiersbe',n:'Wiersbe',c:'#1f6b74',f:'Comentário expositivo de Warren Wiersbe: explicação livro a livro, esboços claros e memoráveis e forte aplicação prática e pastoral.'},
+ {k:'spurgeon',s:'Spurgeon',n:'Spurgeon',c:'#9a3b2a',f:'Bíblia de Estudo e Sermões de C. H. Spurgeon: comentários e esboços tirados dos sermões do "príncipe dos pregadores" — cristocêntrica, evangelística, rica em ilustrações e frases marcantes para o púlpito.'},
+ {k:'genebra',s:'Genebra',n:'Genebra',c:'#34495e',f:'Bíblia de Estudo de Genebra: linha reformada e calvinista — notas teológicas sobre a soberania de Deus, a aliança, a graça e a eleição, com mapas, tabelas e cronologias.'},
+ {k:'reformada',s:'Fé Reformada',n:'Fé Reformada',c:'#4b5d2e',f:'Bíblia de Estudo da Fé Reformada (R. C. Sproul): doutrina reformada versículo a versículo, notas teológicas, artigos e os credos e confissões históricos da Igreja.'},
+ {k:'pentecostal',s:'Pentecostal',n:'Pentecostal',c:'#b4491e',f:'Bíblia de Estudo Pentecostal: a atuação do Espírito Santo — batismo com o Espírito, dons espirituais, manifestações, santificação e avivamento —, com artigos temáticos e mapas.'},
+ {k:'plenitude',s:'Plenitude',n:'Plenitude',c:'#7a2f6b',f:'Bíblia de Estudo Plenitude: perspectiva evangélica que une doutrina e prática — "Notas do Reino", "Verdade em Ação", perfis de personagens, oração, louvor e a vida no Espírito.'},
+ {k:'ntlh',s:'NTLH',n:'NTLH',c:'#2f7d8a',f:'Bíblia de Estudo NTLH (SBB): linguagem simples e direta, notas objetivas, introduções e guias temáticos — ajuda a explicar o texto ao novo convertido.'},
+ {k:'nvi',s:'NVI',n:'NVI',c:'#3a5a9a',f:'Bíblia de Estudo NVI: notas de contexto histórico e doutrina, artigos temáticos, introduções e mapas.'},
+ {k:'naa',s:'NAA',n:'NAA',c:'#6b5a2a',f:'Bíblia de Estudo NAA (SBB): tradição Almeida em texto atual, com notas, introduções, referências cruzadas, quadros e cronologias.'},
+ {k:'nvt',s:'NVT',n:'NVT',c:'#3f7a3a',f:'Bíblia de Estudo NVT: foco na aplicação prática para a vida diária, notas práticas, quadros temáticos e introduções.'},
+ {k:'moody',s:'Moody',n:'Comentário Bíblico Moody',c:'#8c2f4f',f:'Comentário Bíblico Moody: comentário evangélico conservador de toda a Bíblia — exegese versículo a versículo, esboço de cada livro, gramática do original e contexto histórico.'},
+ {k:'sbb',s:'Manual SBB',n:'Manual Bíblico SBB',c:'#2e6f6a',f:'Manual Bíblico SBB: panorama de cada livro — autor, data, destinatários, propósito — com contexto histórico e geográfico, costumes, arqueologia, mapas e cronologias.'},
+ {k:'macarthur',s:'MacArthur',n:'Dicionário Bíblico MacArthur',c:'#5b4a8a',f:'Dicionário Bíblico MacArthur: verbetes de pessoas, lugares, termos e doutrinas, com definição precisa, sentido no original e ensino bíblico, em linha expositiva conservadora.'}
+];
+const LIVROS='genesis exodo levitico numeros deuteronomio josue juizes rute 1samuel 2samuel 1reis 2reis 1cronicas 2cronicas esdras neemias ester jo salmos proverbios eclesiastes canticos isaias jeremias lamentacoes ezequiel daniel oseias joel amos obadias jonas miqueias naum habacuque sofonias ageu zacarias malaquias mateus marcos lucas joao atos romanos 1corintios 2corintios galatas efesios filipenses colossenses 1tessalonicenses 2tessalonicenses 1timoteo 2timoteo tito filemom hebreus tiago 1pedro 2pedro 1joao 2joao 3joao judas apocalipse'.split(' ');
+const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const CAMPOS=['titulo','texto','contexto','dons','descricao','comentarios','linha','objetivos','aplicDesej','serie','tipo','status','data','local','publico','leituraBib','relato','tema','intro','ilustracoes','aplicacao','profetica','conclusao','topicos','resumida'];
+const PCAMPOS=['nome','cargo','igreja','denom','cidade','versao'];
+let CFG={},souDono=false;
+const VERSAO_PADRAO='Almeida Revista e Corrigida (ARC)';
+const DOUTRINA_PADRAO=`Mensagem segundo a doutrina da Igreja Cristã Maranata:
+- A Bíblia como Palavra de Deus inspirada, regra de fé e prática.
+- Um só Deus: Pai, Filho e Espírito Santo. Jesus Cristo, único Salvador, vivo e presente no meio da Igreja.
+- A Obra que o Espírito Santo realiza nesta última hora: batismo com o Espírito Santo, dons espirituais, a voz de Deus falando à Igreja e a manifestação da presença real de Cristo.
+- Salvação pela graça, mediante a fé, com arrependimento, novo nascimento e vida de santificação, oração, louvor e vigilância.
+- A Igreja como a Noiva de Cristo, que se prepara para o arrebatamento. Maranata: o Senhor Jesus vem.
+- O momento profético que antecede a volta do Senhor: discernir e anunciar os sinais dos tempos, sem marcar dia nem hora.
+- Leitura profética das Escrituras: tipos, figuras e as festas de Israel apontando para Cristo e para os acontecimentos da Igreja no fim dos tempos.`;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+let soLocal=false,msgs=[],perfil={},atual=null,aba='holman',col=null,sample=null,downloads=null,timer=null,fs=19,modulo='dev',viewAtual='dev',conta={name:'',avatarUrl:''};
+
+const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)};
+const ls={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let chave='pulpito';fs=ls.get('pulpito-fs',19);
+const nova=()=>({id:'m'+Date.now().toString(36),titulo:'',texto:'',serie:'',tipo:'Expositivo',status:'Rascunho',data:'',local:'',publico:'',leituraBib:'',relato:'',incluirRelato:true,tema:'',intro:'',pontos:[{titulo:'',texto:''}],ilustracoes:'',aplicacao:'',profetica:'',conclusao:'',topicos:'',resumida:'',notas:{},atualizado:Date.now()});
+const comRelato=m=>m.incluirRelato!==false;
+const dataBR=d=>d?d.split('-').reverse().join('/'):'';
+const linhas=t=>String(t||'').split(/\n+/).map(s=>s.replace(/^\s*[-•*–]\s*/,'').trim()).filter(Boolean);
+function livro(t){const n=norm(t).replace(/[^a-z0-9]/g,'');let best=-1,len=0;LIVROS.forEach((l,i)=>{if(n.startsWith(l)&&l.length>len){best=i;len=l.length}});return best}
+function nomeLivro(t){return livro(t)<0?'Outros textos':String(t).trim().replace(/\s*\d+\s*[:.,].*$/,'').replace(/\s+\d+$/,'')}
+const PERFIS=['Pastor','Ungido','Diácono','Obreiro','Jovem','Senhora','Outros'];
+const autor=()=>perfil.nome||conta.name||'';
+const cargoTxt=()=>PERFIS.includes(perfil.cargo)&&perfil.cargo!=='Outros'?perfil.cargo:'';
+const autorDe=m=>m&&m._pub?(m.autor||''):autorLinha();
+const autorLinha=()=>[autor()&&cargoTxt()?`${autor()} (${cargoTxt()})`:autor(),perfil.igreja].filter(Boolean).join(' · ');
+
+$('fontesN').textContent=`· ${FONTES.length} obras de estudo, mais o acervo de apostilas`;
+$('fontesInfo').innerHTML=FONTES.map(f=>`<div class="fonte" style="--c:${f.c}"><b>${esc(f.n)}</b><span>${esc(f.f)}</span></div>`).join('');
+
+/* ---------- módulos e vistas ---------- */
+const mobile=()=>matchMedia('(max-width:760px)').matches;
+function setModulo(m){modulo=m;$('mDev').setAttribute('aria-pressed',m==='dev');$('mGest').setAttribute('aria-pressed',m==='gest');$('mBib').setAttribute('aria-pressed',m==='bib');$('sDev').hidden=m!=='dev';$('sGest').hidden=m!=='gest';$('sBib').hidden=m!=='bib';renderLista()}
+function vista(v,naPagina){
+ viewAtual=v;['Dev','Nova','Lib','Pub','Read','Edit','Perfil','Biblia'].forEach(n=>$('v'+n).hidden=n.toLowerCase()!==v);
+ if(v==='dev'||v==='lib'||v==='pub')atual=null;
+ document.body.dataset.view='page';
+ renderLista();window.scrollTo(0,0);navAtivo();
+}
+function navAtivo(){const v=viewAtual,t=v==='dev'?'inicio':v==='nova'?'gerar':v==='edit'?(modulo==='dev'?'gerar':'msgs'):(v==='lib'||v==='pub'||v==='read')?'msgs':v==='biblia'?'biblia':v==='perfil'?'perfil':'';
+ document.querySelectorAll('.tabbar [data-tab]').forEach(b=>{if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
+document.querySelector('.tabbar').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const t=b.dataset.tab;
+ if(t==='inicio'){guardar();setModulo('dev');vista('dev')}
+ else if(t==='msgs'){guardar();setModulo('gest');vista('lib',true)}
+ else if(t==='gerar')irNova();
+ else if(t==='biblia')abrirBiblia();
+ else if(t==='perfil'){guardar();carregarPerfil();vista('perfil')}});
+$('mDev').onclick=()=>{guardar();setModulo('dev');vista('dev')};
+$('mGest').onclick=()=>{guardar();setModulo('gest');vista('lib',mobile()?false:true)};
+$('verEstante').onclick=()=>vista('lib',true);
+$('dMenu').onclick=$('lMenu').onclick=()=>{document.body.dataset.view='menu'};
+$('mePerfil').onclick=()=>{guardar();carregarPerfil();vista('perfil')};
+$('pVoltar').onclick=()=>{modulo==='dev'?vista('dev',true):vista('lib',true)};
+
+/* ---------- organização ---------- */
+function organizar(){
+ const q=norm($('busca').value.trim()),st=$('fStatus').value,o=$('ordem').value;
+ let v=msgs.filter(m=>(!st||m.status===st)&&(!q||norm([m.titulo,m.texto,m.tema,m.serie].join(' ')).includes(q)));
+ const tit=(a,b)=>(a.titulo||'').localeCompare(b.titulo||'','pt');
+ const grupos=new Map(),add=(k,m,ord)=>{if(!grupos.has(k))grupos.set(k,{k,ord,itens:[]});grupos.get(k).itens.push(m)};
+ if(o==='serie'){v.forEach(m=>add(m.serie?.trim()||'Sem série',m,m.serie?.trim()?norm(m.serie):'~'));grupos.forEach(g=>g.itens.sort((a,b)=>(a.data||'9').localeCompare(b.data||'9')||tit(a,b)))}
+ else if(o==='livro'){v.forEach(m=>{const i=livro(m.texto);add(nomeLivro(m.texto),m,i<0?999:i)});grupos.forEach(g=>g.itens.sort((a,b)=>(a.texto||'').localeCompare(b.texto||'','pt',{numeric:true})))}
+ else if(o==='data'){v.forEach(m=>{const d=m.data;add(d?MESES[+d.slice(5,7)-1]+' de '+d.slice(0,4):'Sem data',m,d?'0'+(99999-+d.slice(0,7).replace('-','')):'9')});grupos.forEach(g=>g.itens.sort((a,b)=>(b.data||'').localeCompare(a.data||'')))}
+ else{grupos.set('',{k:'',ord:0,itens:v.sort(o==='titulo'?tit:(a,b)=>b.atualizado-a.atualizado)})}
+ return [...grupos.values()].filter(g=>g.itens.length).sort((a,b)=>a.ord<b.ord?-1:a.ord>b.ord?1:0);
+}
+const item=m=>`<li><button data-id="${esc(m.id)}" aria-current="${!!(atual&&atual.id===m.id)}"><b>${esc(m.titulo||'Sem título')}</b><small>${esc(m.texto||'—')}<span class="tag">${esc(m.status)}</span></small></button></li>`;
+function renderLista(){
+ const gs=organizar();
+ $('lista').innerHTML=gs.length?gs.map(g=>(g.k?`<li class="grp">${esc(g.k)}</li>`:'')+g.itens.map(item).join('')).join(''):`<li style="color:#d9bfc5;font-size:15px;padding:8px 4px">${msgs.length?'Nada encontrado.':'Nenhuma mensagem ainda.'}</li>`;
+ const rasc=msgs.filter(m=>m.status==='Rascunho').sort((a,b)=>b.atualizado-a.atualizado);
+ $('listaDev').innerHTML=`<li class="grp">Em desenvolvimento</li>`+(rasc.length?rasc.map(item).join(''):`<li style="color:#d9bfc5;font-size:15px;padding:8px 4px">Nenhum rascunho. Mensagens salvas como Pronta ou Pregada ficam em “Minhas mensagens”.</li>`);
+ renderEstante(gs);renderIndice();
+ $('series').innerHTML=[...new Set(msgs.map(m=>m.serie).filter(Boolean))].map(s=>`<option value="${esc(s)}">`).join('');
+}
+/* ---------- índice e localização ---------- */
+function partesTexto(m){
+ return [['Título',m.titulo],['Passagem',m.texto],['Série',m.serie],['Tema',m.tema],['Tópicos',m.topicos],['Mensagem resumida',m.resumida],['Leitura bíblica',m.leituraBib],['Relato',m.relato],['Introdução',m.intro],...(m.pontos||[]).map((p,i)=>[`Ponto ${i+1}`,(p.titulo||'')+' '+(p.texto||'')]),['Ilustrações',m.ilustracoes],['Aplicação',m.aplicacao],['Aplicação profética',m.profetica],['Conclusão',m.conclusao],['Orientações',[m.descricao,m.comentarios,m.linha,m.objetivos,m.aplicDesej].join(' ')],['Local',m.local],['Pregações',(m.pregacoes||[]).map(e=>[dataBR(e.data),e.igreja,e.cidade,e.ocasiao,e.obs].join(' ')).join(' ')],['Público',m.publico],...FONTES.map(f=>[`Notas ${f.n}`,(m.notas||{})[f.k]])].filter(x=>x[1]&&String(x[1]).trim());
+}
+function localizar(m,termos){
+ const ps=partesTexto(m),achou=[];
+ for(const t of termos){let ok=false;for(const [rot,txt] of ps){const i=norm(txt).indexOf(t);if(i>=0){ok=true;if(!achou.some(a=>a.rot===rot))achou.push({rot,txt:String(txt),i,len:t.length});break}}if(!ok)return null}
+ return achou;
+}
+function trecho(a){
+ const s=Math.max(0,a.i-50),e=Math.min(a.txt.length,a.i+a.len+70),t=a.txt.replace(/\s+/g,' ');
+ const ini=t.slice(s,a.i),mid=t.slice(a.i,a.i+a.len),fim=t.slice(a.i+a.len,e);
+ return `<em>${esc(a.rot)}:</em> ${s>0?'…':''}${esc(ini)}<mark>${esc(mid)}</mark>${esc(fim)}${e<a.txt.length?'…':''}`;
+}
+function renderHome(){
+ const c=s=>msgs.filter(m=>m.status===s).length;
+ $('tMsgs').textContent=msgs.length?`${msgs.length} ${msgs.length>1?'mensagens':'mensagem'} · ${c('Pronta')} prontas · ${c('Pregada')} pregadas →`:'Ainda nenhuma mensagem →';
+}
+try{$('hData').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}catch(e){}
+const rolar=id=>$(id).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});
+const irNova=()=>{guardar();setModulo('dev');vista('nova');setTimeout(()=>$('qTexto').focus(),50)};
+$('irNova').onclick=irNova;
+document.addEventListener('click',e=>{if(e.target.closest('[data-home]')){guardar();setModulo('dev');vista('dev')}});
+$('irMsgs').onclick=()=>{guardar();setModulo('gest');vista('lib',true)};
+$('irBiblia').onclick=()=>abrirBiblia();
+function renderIndice(){
+ renderHome();
+ const q=norm($('iBusca').value.trim()),termos=q.split(/\s+/).filter(Boolean),o=$('iOrdem').value;
+ let itens=msgs.map(m=>({m,hits:termos.length?localizar(m,termos):[]})).filter(x=>x.hits);
+ const tit=(a,b)=>(a.m.titulo||'').localeCompare(b.m.titulo||'','pt');
+ let grupo;
+ if(o==='livro'){itens.sort((a,b)=>{const la=livro(a.m.texto),lb=livro(b.m.texto);return (la<0?999:la)-(lb<0?999:lb)||(a.m.texto||'').localeCompare(b.m.texto||'','pt',{numeric:true})});grupo=x=>nomeLivro(x.m.texto)}
+ else if(o==='data'){itens.sort((a,b)=>(b.m.data||'').localeCompare(a.m.data||'')||b.m.atualizado-a.m.atualizado);grupo=x=>x.m.data?x.m.data.slice(0,4):'Sem data'}
+ else{itens.sort(tit);grupo=x=>{const c=norm((x.m.titulo||'#').trim())[0]||'#';return /[a-z]/.test(c)?c.toUpperCase():'#'}}
+ $('iCount').textContent=msgs.length?`· ${msgs.length} ${msgs.length>1?'mensagens':'mensagem'}`:'';
+ $('iInfo').textContent=termos.length?(itens.length?`${itens.length} ${itens.length>1?'mensagens encontradas':'mensagem encontrada'}`:'Nada encontrado. Tente outra palavra ou só parte dela.'):'';
+ if(!msgs.length){$('iLista').innerHTML='<p class="vazio" style="padding:8px 0">As mensagens que você criar aparecem aqui, numeradas.</p>';return}
+ let atualG=null,n=0;
+ $('iLista').innerHTML=itens.map(x=>{const g=grupo(x),cab=g!==atualG?`<div class="iletra">${esc(g)}</div>`:'';atualG=g;n++;const m=x.m;
+  return cab+`<div class="ient"><button class="iopen" data-id="${esc(m.id)}"><span class="n">${n}.</span><span><b>${esc(m.titulo||'Sem título')}</b><span class="ref">${esc([m.texto,m.serie].filter(Boolean).join(' · ')||'—')}</span></span><span class="d">${esc([dataBR(m.data),m.status].filter(Boolean).join(' · '))}${m.publica?`<span class="tagpub">${ICO_GLOBE}Pública</span>`:''}</span>${x.hits.length?`<span class="hit">${x.hits.slice(0,2).map(trecho).join('<br>')}</span>`:''}</button><div class="iact"><button class="ic" data-share="${esc(m.id)}" aria-label="Compartilhar ${esc(m.titulo||'mensagem')} em PDF" title="Compartilhar PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button><button class="ic" data-ed="${esc(m.id)}" aria-label="Editar ${esc(m.titulo||'mensagem')}" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button><button class="ic del" data-del="${esc(m.id)}" aria-label="Apagar ${esc(m.titulo||'mensagem')}" title="Apagar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button></div></div>`}).join('');
+}
+$('iBusca').oninput=renderIndice;
+$('iOrdem').value=ls.get('pulpito-iordem','az');
+$('iOrdem').onchange=()=>{ls.set('pulpito-iordem',$('iOrdem').value);renderIndice()};
+$('iLista').addEventListener('click',e=>{
+ const ed=e.target.closest('[data-ed]'),dl=e.target.closest('[data-del]'),op=e.target.closest('[data-id]'),sh=e.target.closest('[data-share]');
+ if(sh){abrir(sh.dataset.share,'read');abrirExp('pdf');return}
+ if(ed){setModulo('dev');abrir(ed.dataset.ed,'edit')}else if(dl)pedirApagar(dl.dataset.del);else if(op)abrir(op.dataset.id,'read');
+});
+
+function renderEstante(gs){
+ const c=s=>msgs.filter(m=>m.status===s).length;
+ $('stats').innerHTML=[['Mensagens',msgs.length],['Rascunhos',c('Rascunho')],['Prontas',c('Pronta')],['Pregadas',c('Pregada')],['Séries',new Set(msgs.map(m=>m.serie).filter(Boolean)).size]].map(([l,n])=>`<div><b>${n}</b>${l}</div>`).join('');
+ $('estante').innerHTML=gs.length?gs.map(g=>`<div class="shelf">${g.k?`<h3>${esc(g.k)} <small>${g.itens.length} ${g.itens.length>1?'mensagens':'mensagem'}</small></h3>`:''}<div class="cards">${g.itens.map(m=>`<button class="card" data-id="${esc(m.id)}"><b>${esc(m.titulo||'Sem título')}</b><span>${esc(m.texto||'Sem texto-base')}</span><span>${esc([dataBR(m.data),m.local].filter(Boolean).join(' · '))}</span><em>${esc(m.status)}</em></button>`).join('')}</div></div>`).join(''):`<p class="vazio">${msgs.length?'Nenhuma mensagem com esse filtro.':'Sua estante está vazia. Vá em “Desenvolver” para criar a primeira mensagem.'}</p>`;
+}
+
+/* ---------- abrir ---------- */
+function abrir(id,modo){
+ const m=msgs.find(x=>x.id===id);if(!m)return;guardar();atual=m;
+ if(!atual.pontos||!atual.pontos.length)atual.pontos=[{titulo:'',texto:''}];
+ modo=modo||(modulo==='dev'?'edit':'read');
+ if(modo==='read')renderLeitura();else carregarEditor();
+ vista(modo);
+}
+function carregarEditor(){CAMPOS.forEach(c=>$(c).value=atual[c]||'');$('incluirRelato').checked=comRelato(atual);$('orient').open=['contexto','dons','descricao','comentarios','linha','objetivos','aplicDesej'].some(k=>atual[k]);renderPontos();renderAba();$('salvo').textContent='Salvo'}
+function renderPontos(){
+ $('pontos').innerHTML=atual.pontos.map((p,i)=>`<div class="pt"><div class="hd"><span>${i+1}.</span><input data-pt="${i}" data-f="titulo" value="${esc(p.titulo)}" placeholder="Título do ponto" aria-label="Título do ponto ${i+1}"><button data-rm="${i}" aria-label="Remover ponto ${i+1}">✕</button></div><textarea data-pt="${i}" data-f="texto" placeholder="Explicação, versículos de apoio, observações…">${esc(p.texto)}</textarea></div>`).join('');
+}
+function renderAba(){
+ const b=FONTES.find(x=>x.k===aba);
+ $('fitas').innerHTML=FONTES.map(x=>`<button class="ribbon" role="tab" data-aba="${x.k}" aria-selected="${x.k===aba}" style="background:${x.c}">${esc(x.n)}</button>`).join('');
+ $('painel').style.setProperty('--rb',b.c);$('foco').textContent=b.f;$('notaLbl').textContent='Anotações · '+b.n;
+ $('nota').value=(atual.notas||{})[aba]||'';
+}
+const P=t=>String(t||'').split(/\n+/).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${esc(s)}</p>`).join('');
+function renderLeitura(){
+ if(renderLeitura.ult!==atual){pregEd=null;renderLeitura.ult=atual}
+ const m=atual,L=$('leitura'),alheia=!!m._pub&&m._uid!==meuId;
+ $('rSalvar').hidden=alheia||m._pub||m.status!=='Rascunho';$('rEditar').hidden=alheia||!!m._pub;$('rApagar').hidden=alheia||!!m._pub;
+ $('rVis').hidden=!!m._pub||!pubDb||soLocal;if(!m._pub)visBotao(m);
+ $('rPubNota').hidden=!m._pub;if(m._pub)$('rPubNota').textContent=alheia?`Mensagem pública de ${m.autor||'outro usuário'} — somente leitura.`:'Esta é a versão pública da sua mensagem. Para editar, abra-a em “Minhas mensagens”.';L.style.setProperty('--fs',fs+'px');
+ const sec=(t,x)=>x&&x.trim()?`<h2>${t}</h2>${P(x)}`:'';
+ const tp=linhas(m.topicos);
+ const notas=FONTES.filter(b=>(m.notas||{})[b.k]).map(b=>`<h3 style="--rb:${b.c}">${esc(b.n)}</h3>${P(m.notas[b.k])}`).join('');
+ const parte=(n,id,t)=>`<div class="parte" id="${id}"><small>Parte ${n}</small><h2>${t}</h2></div>`;
+ const completa=`${m.leituraBib?`<h2>Leitura bíblica</h2><div class="biblia">${P(m.leituraBib)}</div>`:''}${comRelato(m)?sec('O relato',m.relato):''}${m.tema?`<div class="temaL">${esc(m.tema)}</div>`:''}${sec('Introdução',m.intro)}${m.pontos.filter(p=>p.titulo||p.texto).map((p,i)=>`<h2>${i+1}. ${esc(p.titulo)}</h2>${P(p.texto)}`).join('')}${sec('Ilustrações',m.ilustracoes)}${sec('Aplicação',m.aplicacao)}${sec('Aplicação profética',m.profetica)}${sec('Conclusão e apelo',m.conclusao)}${notas?`<div class="notas"><h2>Notas de estudo</h2>${notas}</div>`:''}${m.acervoUsado&&m.acervoUsado.length&&!m._pub?`<p class="note" style="margin-top:18px;font-family:'Source Sans 3',sans-serif">Consultado no acervo de apostilas: ${esc(m.acervoUsado.join('; '))}.</p>`:''}`;
+ L.innerHTML=`${m.serie?`<div class="serie">${esc(m.serie)}</div>`:''}<h1>${esc(m.titulo||'Sem título')}</h1>${m.texto?`<p class="ref">${esc(m.texto)}</p>`:''}<div class="info">${esc([autorDe(m),m.tipo,dataBR(m.data),m.local,m.publico,m.status].filter(Boolean).join(' · '))}</div>
+ ${m.escolha&&!m._pub?`<p class="escolha"><b>Passagem escolhida pelo app a partir do seu contexto.</b> ${esc(m.escolha)}${m.alternativas?` <br><b>Outras opções:</b> ${esc(m.alternativas)}`:''}</p>`:''}
+ <div class="partes"><button data-ir="p1">1 · Tópicos</button><button data-ir="p2">2 · Resumida</button><button data-ir="p3">3 · Completa</button></div>
+ ${parte(1,'p1','Tópicos da mensagem')}${tp.length?`<div class="resumo" style="margin-top:14px"><ul>${tp.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:'<p class="note">Ainda sem tópicos — use “✦ Gerar tópicos” no editor.</p>'}
+ ${parte(2,'p2','Mensagem resumida')}${m.resumida?`<div class="tom">${P(m.resumida)}</div>`:'<p class="note">Ainda sem versão resumida — use “✦ Gerar resumida” no editor.</p>'}
+ ${parte(3,'p3','Mensagem completa')}${completa}
+ <section class="preg" id="pregBox"></section>`;
+ renderPreg();
+}
+$('leitura').addEventListener('click',e=>{const b=e.target.closest('[data-ir]');if(b)$(b.dataset.ir).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})});
+
+/* ---------- salvar ---------- */
+const limpo=o=>JSON.parse(JSON.stringify(o));
+const pend=new Set(ls.get('pulpito-pend',[]));const pendSalvar=()=>ls.set('pulpito-pend',[...pend]);
+async function salvar(m){
+ m.atualizado=Date.now();ls.set(chave,msgs);if(m.publica)pubAgendar(m);
+ if(col&&navigator.onLine!==false){try{await col.doc(m.id).set(limpo(m));pend.delete(m.id);pendSalvar();if(m===atual)$('salvo').textContent='Salvo na sua conta';return}catch(e){}}
+ pend.add(m.id);pendSalvar();
+ if(m===atual)$('salvo').textContent=navigator.onLine===false?'Sem internet · salvo neste aparelho':'Salvo neste aparelho';
+}
+function agendar(){$('salvo').textContent='Alterações não salvas…';clearTimeout(timer);const m=atual;timer=setTimeout(()=>{timer=null;salvar(m);renderLista()},1500)}
+function guardar(){if(timer&&atual){clearTimeout(timer);timer=null;salvar(atual)}}
+$('salvar').onclick=async()=>{
+ clearTimeout(timer);timer=null;const m=atual;
+ if(!m.titulo.trim()){m.titulo='Mensagem de '+new Date().toLocaleDateString('pt-BR');$('titulo').value=m.titulo}
+ if(m.status==='Rascunho'){m.status='Pronta';$('status').value='Pronta'}
+ await salvar(m);toast('Mensagem salva em “Minhas mensagens”');
+ setModulo('gest');renderLeitura();vista('read');
+};
+
+$('vEdit').addEventListener('input',e=>{
+ if(!atual)return;const t=e.target;
+ if(CAMPOS.includes(t.id))atual[t.id]=t.value;
+ else if(t.id==='incluirRelato')atual.incluirRelato=t.checked;
+ else if(t.id==='nota'){atual.notas=atual.notas||{};atual.notas[aba]=t.value}
+ else if(t.dataset.pt!=null)atual.pontos[+t.dataset.pt][t.dataset.f]=t.value;
+ else return;agendar();
+});
+const clicarId=e=>{const b=e.target.closest('[data-id]');if(b)abrir(b.dataset.id)};
+$('lista').addEventListener('click',clicarId);$('listaDev').addEventListener('click',clicarId);$('estante').addEventListener('click',clicarId);
+$('fitas').addEventListener('click',e=>{const b=e.target.closest('[data-aba]');if(b){aba=b.dataset.aba;renderAba()}});
+$('pontos').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;atual.pontos.splice(+b.dataset.rm,1);if(!atual.pontos.length)atual.pontos.push({titulo:'',texto:''});renderPontos();agendar()});
+$('addPt').onclick=()=>{atual.pontos.push({titulo:'',texto:''});renderPontos();agendar();const i=$('pontos').querySelectorAll('input');i[i.length-1].focus()};
+const criar=()=>{const m=nova();msgs.push(m);salvar(m);setModulo('dev');abrir(m.id,'edit');$('titulo').focus()};
+$('novo').onclick=()=>irNova();$('novo2').onclick=criar;
+$('eVoltar').onclick=()=>{guardar();modulo==='dev'?vista('dev',true):vista('lib',true)};
+$('rVoltar').onclick=()=>{if(atual&&atual._pub){abrirPub()}else vista('lib',true)};
+$('eLer').onclick=()=>{guardar();renderLeitura();vista('read')};
+$('rApagar').onclick=()=>pedirApagar(atual.id);
+$('rEditar').onclick=()=>{setModulo('dev');carregarEditor();vista('edit')};
+$('fsMenos').onclick=()=>{fs=Math.max(15,fs-1);ls.set('pulpito-fs',fs);renderLeitura()};
+$('fsMais').onclick=()=>{fs=Math.min(30,fs+1);ls.set('pulpito-fs',fs);renderLeitura()};
+$('busca').oninput=renderLista;$('fStatus').onchange=renderLista;
+$('ordem').value=ls.get('pulpito-ordem','serie');
+$('ordem').onchange=()=>{ls.set('pulpito-ordem',$('ordem').value);renderLista()};
+let alvo=null;
+function pedirApagar(id){const m=msgs.find(x=>x.id===id);if(!m)return;alvo=id;$('dlgTit').textContent=`Apagar “${m.titulo||'Sem título'}”?`;$('dlg').classList.add('on');$('nao').focus()}
+$('excluir').onclick=()=>pedirApagar(atual.id);
+$('nao').onclick=()=>$('dlg').classList.remove('on');
+$('sim').onclick=async()=>{
+ $('dlg').classList.remove('on');const id=alvo;alvo=null;if(!id)return;
+ const aberta=atual&&atual.id===id;if(aberta){clearTimeout(timer);timer=null}
+ const ap=msgs.find(m=>m.id===id);msgs=msgs.filter(m=>m.id!==id);ls.set(chave,msgs);if(col){try{if(navigator.onLine===false)throw 0;await col.doc(id).delete();pend.delete(id)}catch(e){pend.add(id)}pendSalvar()}
+ if(ap&&ap.publica){clearTimeout(pubTimers[id]);ap.publica=false;pubGravar(ap).catch(()=>{})}
+ if(aberta){atual=null;modulo==='dev'?vista('dev',true):vista('lib',true)}else renderLista();
+ toast('Mensagem apagada');
+};
+$('dlg').addEventListener('click',e=>{if(e.target.id==='dlg')$('dlg').classList.remove('on')});
+
+function comoTexto(m,sel){
+ sel=sel||'tudo';const um=sel!=='tudo';
+ const L=[m.titulo||'Sem título',`Texto-base: ${m.texto}`,[autorDe(m),m.serie,m.tipo,dataBR(m.data),m.local].filter(Boolean).join(' · '),''];
+ const tp=linhas(m.topicos);
+ if(sel==='tudo'||sel==='topicos')L.push(um?'TÓPICOS DA MENSAGEM':'PARTE 1 · TÓPICOS DA MENSAGEM',...tp.map(t=>'• '+t),'');
+ if(sel==='tudo'||sel==='resumida')L.push(um?'MENSAGEM RESUMIDA':'PARTE 2 · MENSAGEM RESUMIDA',m.resumida||'','');
+ if(sel!=='tudo'&&sel!=='longa')return L.join('\n').trim();
+ L.push(um?'MENSAGEM COMPLETA':'PARTE 3 · MENSAGEM COMPLETA','');
+ if(m.leituraBib)L.push('LEITURA BÍBLICA',m.leituraBib,'');
+ if(comRelato(m)&&m.relato)L.push('O RELATO',m.relato,'');
+ L.push(`TEMA: ${m.tema}`,'','INTRODUÇÃO',m.intro,'');
+ m.pontos.forEach((p,i)=>L.push(`${i+1}. ${p.titulo}`,p.texto,''));
+ L.push('ILUSTRAÇÕES',m.ilustracoes,'','APLICAÇÃO',m.aplicacao,'');
+ if(m.profetica)L.push('APLICAÇÃO PROFÉTICA',m.profetica,'');
+ L.push('CONCLUSÃO E APELO',m.conclusao);
+ const PG=pregOrd(m);if(PG.length)L.push('','ONDE FOI PREGADA',...PG.map(e=>'• '+[dataBR(e.data),e.igreja,e.cidade,e.ocasiao].filter(Boolean).join(' · ')));
+ FONTES.forEach(b=>{const n=(m.notas||{})[b.k];if(n)L.push('',`NOTAS · ${b.n.toUpperCase()}`,n)});
+ return L.join('\n');
+}
+const NOMES_EXP={tudo:'',topicos:'-topicos',resumida:'-resumida',longa:'-completa'};
+const ROT_EXP={tudo:'Mensagem completa',topicos:'Tópicos',resumida:'Mensagem curta',longa:'Mensagem longa'};
+const expSel=()=>(document.querySelector('input[name=expSel]:checked')||{}).value||'tudo';
+function abrirExp(foco){$('dlgExp').classList.add('on');(foco==='copiar'||!downloads?$('eCopiar'):$('ePdf')).focus()}
+$('rCopiar').onclick=()=>abrirExp('copiar');
+$('eCancel').onclick=()=>$('dlgExp').classList.remove('on');
+$('dlgExp').addEventListener('click',e=>{if(e.target.id==='dlgExp')$('dlgExp').classList.remove('on')});
+$('eCopiar').onclick=async()=>{const s=expSel();try{await navigator.clipboard.writeText(comoTexto(atual,s));$('dlgExp').classList.remove('on');toast('Copiado: '+ROT_EXP[s].toLowerCase())}catch(e){toast('Não foi possível copiar')}};
+
+/* ---------- perfil ---------- */
+function carregarPerfil(){
+ acvMeta().then(acvStatus).catch(()=>acvStatus());
+ PCAMPOS.forEach(k=>$('pf'+k[0].toUpperCase()+k.slice(1)).value=perfil[k]||'');
+ if(!perfil.nome&&conta.name)$('pfNome').value=conta.name;
+ $('pfDoutrina').value=doutrina();$('pfDoutrina').readOnly=!souDono;$('pfDoutrina').classList.toggle('travado',!souDono);
+ $('pfDoutNota').textContent=souDono?'Você é o administrador: esta linha vale para as mensagens de TODOS os usuários do app.':'Definida pelo administrador do app. Todas as mensagens geradas seguem esta linha.';
+ if(!perfil.versao)$('pfVersao').value=VERSAO_PADRAO;
+ $('pTit').textContent=perfil.nome?'Meu perfil':'Complete seu cadastro';renderMe();
+}
+function renderMe(){
+ $('meNome').textContent=autor()||'Meu perfil';
+ $('meNome').nextElementSibling.textContent=perfil.cargo?'Perfil: '+perfil.cargo:'Perfil e cadastro';
+ if(conta.avatarUrl){$('meImg').src=conta.avatarUrl;$('pImg').src=conta.avatarUrl;$('meImg').hidden=false;$('pImg').hidden=false}else{$('meImg').hidden=true;$('pImg').hidden=true}
+ $('pConta').textContent=conta.name||autor()||'Sua conta';
+ $('cEstado').textContent=col?'Conectado · conteúdo sincronizado na sua conta':soLocal?'Acesso de leitura · seu conteúdo fica salvo neste aparelho (faça cópias de segurança)':'Não conectado · por enquanto o conteúdo fica só neste aparelho';
+ const nd=Object.keys(BIB.dest||{}).length;
+ $('cConteudo').textContent=`${msgs.length} ${msgs.length===1?'mensagem':'mensagens'}, ${nd} ${nd===1?'versículo destacado':'versículos destacados'}, cadastro e comentários da Bíblia — ${col?'salvos na sua conta':'salvos neste aparelho'}.`;
+
+ $('saud').textContent=autor()?`Olá, ${autor()}`:'Bem-vindo ao seu gabinete';
+}
+const abrirSair=t=>{$('sTit').textContent=t;$('dlgSair').classList.add('on');$('sOk').focus()};
+$('cSair').onclick=$('meSair').onclick=()=>abrirSair('Sair da conta');$('cTrocar').onclick=()=>abrirSair('Entrar com outra conta');
+$('sOk').onclick=()=>$('dlgSair').classList.remove('on');
+$('dlgSair').addEventListener('click',e=>{if(e.target.id==='dlgSair')$('dlgSair').classList.remove('on')});
+$('fPerfil').addEventListener('submit',async e=>{
+ e.preventDefault();PCAMPOS.forEach(k=>perfil[k]=$('pf'+k[0].toUpperCase()+k.slice(1)).value.trim());
+ ls.set(chave+'-perfil',perfil);
+ if(col){try{await col.doc('perfil').set(limpo(perfil))}catch(e){}}
+ if(souDono&&pubDb){const nd=$('pfDoutrina').value.trim();if(nd!==(CFG.doutrina||'')){try{CFG={...CFG,doutrina:nd,em:Date.now()};await pubDb.doc('config/app').set(limpo(CFG))}catch(e){toast('Não foi possível salvar a linha doutrinária')}}}
+ renderMe();toast('Cadastro salvo');setModulo('dev');vista('dev',true);
+});
+
+
+
+/* ---------- registro de pregações ---------- */
+let pregEd=null; /* id em edição, 'novo' ou null */
+const OCASIOES=['Culto de domingo','Culto de oração','Santa ceia','Culto de jovens','Seminário','Vigília','Culto nos lares','Evangelismo','Outro'];
+const ICO_ED='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+const ICO_DL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
+const pregOrd=m=>(m.pregacoes||[]).slice().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+function pregForm(e){
+ e=e||{data:new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10),igreja:perfil.igreja||'',cidade:perfil.cidade||'',ocasiao:'Culto de domingo',obs:''};
+ return `<form class="pform" id="pregF">
+  <div><label for="pgData">Data em que foi pregada *</label><input id="pgData" type="date" required value="${esc(e.data)}"></div>
+  <div><label for="pgIgreja">Igreja *</label><input id="pgIgreja" required value="${esc(e.igreja)}" placeholder="Ex.: ICM Centro"></div>
+  <div><label for="pgCidade">Cidade / UF</label><input id="pgCidade" value="${esc(e.cidade||'')}"></div>
+  <div><label for="pgOcasiao">Ocasião</label><input id="pgOcasiao" list="pgOcList" value="${esc(e.ocasiao||'')}"><datalist id="pgOcList">${OCASIOES.map(o=>`<option value="${esc(o)}">`).join('')}</datalist></div>
+  <div style="grid-column:1/-1"><label for="pgObs">Observações</label><textarea id="pgObs" style="min-height:64px" placeholder="Como foi, decisões, testemunhos, o que ajustar na próxima vez…">${esc(e.obs||'')}</textarea></div>
+  <div class="pbt" style="grid-column:1/-1"><button type="button" id="pgCancel">Cancelar</button><button class="pri" type="submit">${pregEd==='novo'?'Registrar pregação':'Salvar alterações'}</button></div>
+ </form>`;
+}
+function renderPreg(){
+ const B=$('pregBox');if(!B)return;const m=atual,meu=!m._pub;const L=pregOrd(m);
+ const igrejas=new Set(L.map(e=>norm(e.igreja))).size;
+ B.innerHTML=`<div class="phead"><div><h2>Onde foi pregada</h2><p>${L.length?`Pregada ${L.length} ${L.length>1?'vezes':'vez'} em ${igrejas} ${igrejas>1?'igrejas':'igreja'} · última em ${dataBR(L[0].data)}`:'Ainda não há registro de pregação desta mensagem.'}</p></div>${meu&&pregEd!=='novo'?'<button type="button" class="pri" id="pgNovo">+ Registrar pregação</button>':''}</div>
+ ${meu&&pregEd==='novo'?pregForm():''}
+ ${L.length?`<ol class="plist">${L.map(e=>pregEd===e.id?`<li class="ped">${pregForm(e)}</li>`:`<li><div class="pdt"><b>${esc(dataBR(e.data))}</b><span>${esc(e.data?new Date(e.data+'T12:00').toLocaleDateString('pt-BR',{weekday:'long'}):'')}</span></div><div class="pcorpo"><b>${esc(e.igreja||'—')}</b><span>${esc([e.cidade,e.ocasiao].filter(Boolean).join(' · '))}</span>${e.obs?`<p>${esc(e.obs)}</p>`:''}</div>${meu?`<div class="iact"><button class="ic" data-pg-ed="${esc(e.id)}" aria-label="Editar registro de ${esc(dataBR(e.data))}" title="Editar">${ICO_ED}</button><button class="ic del" data-pg-del="${esc(e.id)}" aria-label="Remover registro de ${esc(dataBR(e.data))}" title="Remover">${ICO_DL}</button></div>`:''}</li>`).join('')}</ol>`:''}`;
+}
+document.addEventListener('click',async e=>{
+ if(!e.target.closest('#pregBox'))return;const m=atual;if(!m||m._pub)return;
+ if(e.target.id==='pgNovo'){pregEd='novo';renderPreg();$('pgIgreja').focus();return}
+ if(e.target.id==='pgCancel'){pregEd=null;renderPreg();return}
+ const ed=e.target.closest('[data-pg-ed]');if(ed){pregEd=ed.dataset.pgEd;renderPreg();return}
+ const dl=e.target.closest('[data-pg-del]');
+ if(dl){const id=dl.dataset.pgDel;if(dl.dataset.conf!=='1'){dl.dataset.conf='1';dl.classList.add('conf');dl.innerHTML='Remover?';setTimeout(()=>{if(dl.isConnected&&dl.dataset.conf==='1'){dl.dataset.conf='';dl.classList.remove('conf');dl.innerHTML=ICO_DL}},3000);return}
+  m.pregacoes=(m.pregacoes||[]).filter(x=>x.id!==id);await salvar(m);renderPreg();renderLista();toast('Registro removido');}
+});
+document.addEventListener('submit',async e=>{
+ if(e.target.id!=='pregF')return;e.preventDefault();const m=atual;if(!m||m._pub)return;
+ const v={data:$('pgData').value,igreja:$('pgIgreja').value.trim(),cidade:$('pgCidade').value.trim(),ocasiao:$('pgOcasiao').value.trim(),obs:$('pgObs').value.trim()};
+ if(!v.data||!v.igreja){toast('Informe a data e a igreja');return}
+ m.pregacoes=m.pregacoes||[];
+ if(pregEd==='novo'){m.pregacoes.push({id:'p'+Date.now().toString(36),...v});if(m.status!=='Pregada')m.status='Pregada'}
+ else{const x=m.pregacoes.find(x=>x.id===pregEd);if(x)Object.assign(x,v)}
+ const novo=pregEd==='novo';pregEd=null;await salvar(m);renderLeitura();renderLista();
+ toast(novo?'Pregação registrada':'Registro atualizado');
+ requestAnimationFrame(()=>$('pregBox').scrollIntoView({block:'start'}));
+});
+
+/* ---------- mensagens públicas ---------- */
+let pubDb=null,meuId=null,pubIdx={},pubIdxOk=false,pubLista=[],pubTimers={};
+const ICO_LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',ICO_GLOBE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>';
+const CAMPOS_PUB=['pregacoes','titulo','texto','serie','tipo','status','data','local','publico','leituraBib','relato','incluirRelato','tema','intro','pontos','ilustracoes','aplicacao','profetica','conclusao','topicos','resumida','notas'];
+function visBotao(m){const b=$('rVis');b.className='vis'+(m.publica?' pub':'');b.innerHTML=(m.publica?ICO_GLOBE+'Pública':ICO_LOCK+'Privada');b.setAttribute('aria-label','Visibilidade: '+(m.publica?'pública':'privada')+'. Alterar')}
+async function pubGravar(m){
+ if(!pubDb||!meuId)throw new Error('sem conta');
+ const base=pubDb.doc('publicas/'+meuId),ref=base.collection('msgs').doc(m.id);
+ if(!pubIdxOk){const x=await lerDoc(base);pubIdx=(x&&x.idx)||{};pubIdxOk=true}
+ if(m.publica){const c={};CAMPOS_PUB.forEach(k=>{if(m[k]!==undefined)c[k]=m[k]});c.autor=autorLinha();c.atualizado=Date.now();await ref.set(limpo(c));
+  pubIdx[m.id]={titulo:m.titulo||'',texto:m.texto||'',serie:m.serie||'',data:m.data||'',tipo:m.tipo||'',atualizado:c.atualizado}}
+ else{await ref.delete();delete pubIdx[m.id]}
+ await base.set({autor:autorLinha(),idx:limpo(pubIdx)});
+}
+function pubAgendar(m){if(!m.publica||!pubDb)return;clearTimeout(pubTimers[m.id]);pubTimers[m.id]=setTimeout(()=>{pubGravar(m).catch(()=>{})},4000)}
+function abrirVis(){const m=atual;document.querySelector(`input[name=visSel][value=${m.publica?'publica':'privada'}]`).checked=true;
+ $('visAviso').textContent=m.status==='Rascunho'?'Esta mensagem ainda é rascunho. Ao torná-la pública, ela será marcada como Pronta.':'';
+ $('dlgVis').classList.add('on');$('visOk').focus()}
+$('rVis').onclick=abrirVis;
+$('visCancel').onclick=()=>$('dlgVis').classList.remove('on');
+$('dlgVis').addEventListener('click',e=>{if(e.target.id==='dlgVis')$('dlgVis').classList.remove('on')});
+$('visOk').onclick=async()=>{
+ const m=atual,quer=(document.querySelector('input[name=visSel]:checked')||{}).value==='publica';
+ $('dlgVis').classList.remove('on');if(!!m.publica===quer)return;
+ const antes=!!m.publica;m.publica=quer;if(quer&&m.status==='Rascunho')m.status='Pronta';
+ try{await pubGravar(m);await salvar(m);visBotao(m);renderLeitura();renderLista();toast(quer?'Mensagem pública: todos os usuários podem ler':'Mensagem privada: só você vê')}
+ catch(e){m.publica=antes;visBotao(m);toast(e&&e.code==='invalid_argument'?'Sua conta não tem permissão para publicar. Peça ao dono do app acesso de Colaborador.':'Não foi possível alterar agora. Tente de novo.')}
+};
+function renderPub(){
+ const q=norm($('pbBusca').value.trim());
+ const v=pubLista.filter(x=>!q||norm([x.titulo,x.texto,x.serie,x.autor].join(' ')).includes(q));
+ $('pbInfo').textContent=pubLista.length?`${v.length} de ${pubLista.length} ${pubLista.length>1?'mensagens públicas':'mensagem pública'}`:'';
+ $('pbLista').innerHTML=v.length?v.map(x=>`<button class="card" data-pub="${esc(x.uid)}|${esc(x.id)}"><b>${esc(x.titulo||'Sem título')}</b><span>${esc(x.texto||'—')}${x.serie?' · '+esc(x.serie):''}</span><span class="aut">${esc(x.autor||'Usuário do app')}${x.uid===meuId?' (você)':''}</span><span>${esc([dataBR(x.data),x.tipo].filter(Boolean).join(' · '))}</span></button>`).join(''):`<p class="vazio">${pubLista.length?'Nada encontrado com essa busca.':'Ainda não há mensagens públicas. Quando alguém tornar uma mensagem pública, ela aparece aqui.'}</p>`;
+}
+async function abrirPub(){
+ guardar();setModulo('gest');vista('pub');
+ if(!pubDb){$('pbLista').innerHTML='<p class="vazio">Entre com sua conta para ver as mensagens públicas.</p>';return}
+ $('pbInfo').textContent='Carregando…';
+ try{const s=await pubDb.collection('publicas').get();pubLista=[];
+  (s.docs||[]).forEach(d=>{const x=d.data()||{};Object.entries(x.idx||{}).forEach(([id,i])=>pubLista.push({...i,id,uid:d.id,autor:x.autor||''}))});
+  pubLista.sort((a,b)=>(b.atualizado||0)-(a.atualizado||0));renderPub();
+ }catch(e){$('pbInfo').textContent='Não foi possível carregar as mensagens públicas agora.'}
+}
+$('pbBusca').oninput=renderPub;
+$('pbMenu').onclick=()=>{document.body.dataset.view='menu'};
+$('pbLista').addEventListener('click',async e=>{
+ const b=e.target.closest('[data-pub]');if(!b)return;const [uid,id]=b.dataset.pub.split('|');
+ try{const s=await pubDb.doc(`publicas/${uid}/msgs/${id}`).get();if(!s.exists){toast('Esta mensagem não está mais pública');abrirPub();return}
+  atual={...s.data(),id,_pub:true,_uid:uid};if(!Array.isArray(atual.pontos))atual.pontos=[];renderLeitura();vista('read');
+ }catch(err){toast('Não foi possível abrir a mensagem')}
+});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-aba-m]');if(!t)return;if(t.dataset.abaM==='pub')abrirPub();else{setModulo('gest');vista('lib',true)}});
+
+
+/* ---------- acervo de estudo (apostilas) ---------- */
+const ACV={dados:null,carregando:null,normx:null,meta:null};
+const idb={abrir(){return new Promise((ok,er)=>{try{const r=indexedDB.open('pulpito',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>er(r.error)}catch(e){er(e)}})},
+ async get(k){const d=await this.abrir();return new Promise(ok=>{const t=d.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>ok(t.result);t.onerror=()=>ok(undefined)})},
+ async set(k,v){const d=await this.abrir();return new Promise(ok=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>ok(true);t.onerror=()=>ok(false)})},
+ async del(k){const d=await this.abrir();return new Promise(ok=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=()=>ok(true);t.onerror=()=>ok(false)})}};
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
+const unb64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function gunzip(u){const ds=new DecompressionStream('gzip');return await new Response(new Blob([u]).stream().pipeThrough(ds)).text()}
+async function gzip(txt){const cs=new CompressionStream('gzip');return new Uint8Array(await new Response(new Blob([txt]).stream().pipeThrough(cs)).arrayBuffer())}
+const acvRef=()=>pubDb&&meuId?pubDb.doc('data/users/'+meuId+'/acervo'):null;
+function acvStatus(){
+ const m=ACV.meta;$('acvRemover').hidden=!m;$('acvUsar').checked=perfil.usarAcervo!==false;
+ $('acvStatus').textContent=m?`${m.n.toLocaleString('pt-BR')} trechos de ${m.ap} arquivos · importado em ${new Date(m.em).toLocaleDateString('pt-BR')}${m.nuvem?' · salvo na sua conta':' · salvo neste aparelho'}`:'Nenhum acervo importado.';
+}
+async function acvMeta(){
+ if(ACV.meta)return ACV.meta;
+ const loc=await idb.get('acv-meta-'+(meuId||'local')).catch(()=>null);if(loc){ACV.meta=loc;return loc}
+ const r=acvRef();if(r){const x=await lerDoc(r);if(x&&x.n){ACV.meta=x;return x}}
+ return null;
+}
+async function acvCarregar(){
+ if(ACV.dados)return ACV.dados;
+ if(!ACV.carregando)ACV.carregando=(async()=>{
+  const meta=await acvMeta();if(!meta)return null;
+  let u=await idb.get('acv-bin-'+(meuId||'local')).catch(()=>null);
+  if(!u&&meta.nuvem&&acvRef()){const partes=[];for(let i=0;i<meta.partes;i++){const x=await lerDoc(acvRef().collection('partes').doc('p'+i));if(!x||!x.d)throw new Error('parte '+i);partes.push(x.d)}u=unb64(partes.join(''));idb.set('acv-bin-'+(meuId||'local'),u).catch(()=>{})}
+  if(!u)return null;
+  const j=JSON.parse(await gunzip(u));ACV.dados=j.c;return ACV.dados;
+ })().catch(e=>{ACV.carregando=null;return null});
+ return ACV.carregando;
+}
+$('acvUsar').onchange=async()=>{perfil.usarAcervo=$('acvUsar').checked;ls.set(chave+'-perfil',perfil);if(col)col.doc('perfil').set(limpo(perfil)).catch(()=>{})};
+$('acvArq').onchange=async e=>{
+ const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+ const P=$('acvProg');P.textContent='Lendo o arquivo…';
+ try{
+  let u=new Uint8Array(await f.arrayBuffer()),txt;
+  if(u[0]===0x1f&&u[1]===0x8b)txt=await gunzip(u);else{txt=new TextDecoder().decode(u);u=null}
+  const j=JSON.parse(txt);if(!j||!Array.isArray(j.c)||!j.c.length||!Array.isArray(j.c[0]))throw new Error('formato');
+  if(!u)u=await gzip(txt);
+  const meta={n:j.c.length,ap:new Set(j.c.map(x=>x[0])).size,em:Date.now(),fonte:j.fonte||'Apostilas',nuvem:false,partes:0};
+  await idb.set('acv-bin-'+(meuId||'local'),u);ACV.dados=j.c;ACV.normx=null;ACV.carregando=null;
+  if(acvRef()){
+   const s=b64(u),T=200000,n=Math.ceil(s.length/T);
+   try{for(let i=0;i<n;i++){P.textContent=`Salvando na sua conta… ${Math.round(i/n*100)}%`;await acvRef().collection('partes').doc('p'+i).set({d:s.slice(i*T,(i+1)*T)})}
+    meta.nuvem=true;meta.partes=n;await acvRef().set(meta);
+   }catch(err){meta.nuvem=false;P.textContent='Não coube na sua conta; o acervo ficou salvo neste aparelho.'}
+  }
+  await idb.set('acv-meta-'+(meuId||'local'),meta);ACV.meta=meta;acvStatus();
+  if(meta.nuvem)P.textContent='Acervo importado e salvo na sua conta.';toast('Acervo importado: '+meta.n.toLocaleString('pt-BR')+' trechos');
+ }catch(err){P.textContent='Não foi possível importar. Use o arquivo do acervo (.json.gz) enviado para você.'}
+};
+$('acvRemover').onclick=async()=>{
+ if($('acvRemover').dataset.conf!=='1'){$('acvRemover').dataset.conf='1';$('acvRemover').textContent='Confirmar remoção';setTimeout(()=>{$('acvRemover').dataset.conf='';$('acvRemover').textContent='Remover acervo'},3000);return}
+ const meta=ACV.meta;ACV.meta=null;ACV.dados=null;ACV.normx=null;
+ await idb.del('acv-bin-'+(meuId||'local'));await idb.del('acv-meta-'+(meuId||'local'));
+ if(meta&&meta.nuvem&&acvRef()){for(let i=0;i<meta.partes;i++)await acvRef().collection('partes').doc('p'+i).delete().catch(()=>{});await acvRef().delete().catch(()=>{})}
+ $('acvRemover').dataset.conf='';$('acvRemover').textContent='Remover acervo';$('acvProg').textContent='';acvStatus();toast('Acervo removido');
+};
+const STOP=new Set('aquele aquela aqueles aquelas entao porque quando sobre entre ainda mesmo muito muita todos todas outro outra outros pelos pelas sendo esta este estes estas isso isto nosso nossa nossos nossas voces dele dela deles delas onde como qual quais quem para pela pelo apos antes depois sempre nunca tambem senhor jesus deus igreja mensagem texto falar quero culto pode deve sobre ser estar fazer tempo vida'.split(' '));
+function acvTermos(...t){return [...new Set(norm(t.filter(Boolean).join(' ')).replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>=5&&!STOP.has(w)))].slice(0,24)}
+function acvRefsDe(txt){const out=[];if(!txt||!BIB.dados)return out;String(txt).split(/[;\n]/).forEach(s=>{const p=bParse(s.trim());if(p)out.push(`${p.l}.${p.c+1}`)});return out}
+async function acvBuscar(m,{max=4,limite=6500,termosExtra=''}={}){
+ if(perfil.usarAcervo===false)return [];
+ const D=await acvCarregar();if(!D)return [];
+ try{await bCarregar()}catch(e){}
+ if(!ACV.normx)ACV.normx=D.map(x=>norm(x[1]+' '+x[2]));
+ const refs=new Set(acvRefsDe(m.texto)),livros=new Set([...refs].map(r=>r.split('.')[0]));
+ const termos=acvTermos(m.tema,m.titulo,m.contexto,m.descricao,m.linha,m.objetivos,termosExtra);
+ const sc=D.map((x,i)=>{let s=0;const r=x[3]||[],b=x[4]||[];
+  if(refs.size){if(b.some(k=>refs.has(k)))s+=40;else if(r.some(k=>refs.has(k)))s+=18;else if(r.some(k=>livros.has(k.split('.')[0])))s+=2}
+  const t=ACV.normx[i];let k=0;for(const w of termos){if(t.includes(w)){k++;if(norm(x[1]).includes(w))s+=4}}s+=Math.min(k,8)*3;
+  return [s,i]}).filter(a=>a[0]>=12).sort((a,b)=>b[0]-a[0]);
+ const out=[],porMsg={};let tot=0;
+ for(const [s,i] of sc){const x=D[i],kk=x[0]+'|'+x[1];if((porMsg[kk]||0)>=2)continue;let tx=x[2];if(tx.length>2000)tx=tx.slice(0,2000)+'…';if(tot+tx.length>limite)continue;porMsg[kk]=(porMsg[kk]||0)+1;tot+=tx.length;out.push({ap:x[0],t:x[1],x:tx});if(out.length>=max)break}
+ return out;
+}
+const acvBloco=lst=>lst.length?`\n\nACERVO DE ESTUDO — trechos das apostilas da Igreja Cristã Maranata do próprio pregador sobre este texto ou tema. Use-os como a principal referência de linha de pensamento, de interpretação (tipos, figuras, paralelos proféticos) e de desenvolvimento; incorpore suas ideias com suas palavras, podendo citar frases curtas; não copie parágrafos inteiros:\n${lst.map((c,i)=>`[${i+1}] ${c.t?'“'+c.t+'” — ':''}${c.ap}\n${c.x}`).join('\n\n')}`:'';
+
+/* ---------- PDF ---------- */
+const lat=s=>String(s||'').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/[–—]/g,'-').replace(/[^\x00-\xff]/g,'');
+function gerarPDF(m,sel){
+ sel=sel||'tudo';const um=sel!=='tudo';let primeira=true;
+ const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
+ const PW=210,PH=297,MX=22,W=PW-2*MX,TOP=24,BOT=PH-22,VINHO=[74,22,38],OURO=[160,120,40],CINZA=[110,96,100];
+ let y=TOP;
+ const cabe=h=>{if(y+h>BOT){doc.addPage();y=TOP}};
+ const fonte=(st,sz,cor)=>{doc.setFont('times',st);doc.setFontSize(sz);doc.setTextColor(...(cor||[33,23,26]))};
+ const lh=sz=>sz*0.3528*1.5;
+ function linhaJust(ln,x,w,ultima){const pal=ln.trim().split(/\s+/);if(ultima||pal.length<2){doc.text(ln.trim(),x,y);return}const soma=pal.reduce((a,p)=>a+doc.getTextWidth(p),0),gap=(w-soma)/(pal.length-1);let cx=x;pal.forEach(p=>{doc.text(p,cx,y);cx+=doc.getTextWidth(p)+gap})}
+ function justificado(txt,x,w,sz,st){
+  fonte(st||'normal',sz);
+  String(txt||'').split(/\n+/).map(s=>lat(s).trim()).filter(Boolean).forEach(par=>{
+   const ls2=doc.splitTextToSize(par,w);
+   ls2.forEach((ln,i)=>{cabe(lh(sz));linhaJust(ln,x,w,i===ls2.length-1);y+=lh(sz)});
+   y+=lh(sz)*0.45;
+  });
+ }
+ const titulo=(t,sz)=>{cabe(lh(sz)*2.6);y+=lh(sz)*0.6;fonte('bold',sz,VINHO);doc.splitTextToSize(lat(t),W).forEach(l=>{doc.text(l,MX,y);y+=lh(sz)});y+=1.5};
+ if(m.serie){fonte('bold',10,OURO);doc.text(lat(m.serie),MX,y);y+=6}
+ fonte('bold',24,VINHO);doc.splitTextToSize(lat(m.titulo||'Sem título'),W).forEach(l=>{doc.text(l,MX,y);y+=10});
+ if(m.texto){fonte('italic',14);doc.text(lat(m.texto),MX,y);y+=7}
+ const info=[autorDe(m),m.tipo,dataBR(m.data),m.local,m.publico].filter(Boolean).join('  ·  ');
+ if(info){fonte('normal',10,CINZA);doc.splitTextToSize(lat(info),W).forEach(l=>{doc.text(l,MX,y);y+=5})}
+ doc.setDrawColor(...OURO);doc.setLineWidth(0.4);doc.line(MX,y+2,PW-MX,y+2);y+=10;
+ const sec=(t,x)=>{if(x&&x.trim()){titulo(t,15);justificado(x,MX,W,12)}};
+ const parte=(n,t)=>{if(!primeira){doc.addPage();y=TOP}else{cabe(30)}primeira=false;if(!um){fonte('bold',10,OURO);doc.text('PARTE '+n,MX,y);y+=8}else y+=2;fonte('bold',20,VINHO);doc.text(lat(t),MX,y);y+=4;doc.setDrawColor(...OURO);doc.setLineWidth(0.4);doc.line(MX,y,MX+30,y);y+=8};
+ const tp=linhas(m.topicos);
+ if(sel==='tudo'||sel==='topicos'){parte(1,'Tópicos da mensagem');fonte('normal',12);
+ tp.forEach(t=>{const ls2=doc.splitTextToSize(lat(t),W-7);ls2.forEach((ln,i)=>{cabe(lh(12));if(i===0){doc.setFillColor(...OURO);doc.circle(MX+1.6,y-1.4,0.9,'F')}linhaJust(ln,MX+7,W-7,i===ls2.length-1);y+=lh(12)});y+=2})}
+ if(sel==='tudo'||sel==='resumida'){parte(2,'Mensagem resumida');
+ if(m.texto){fonte('italic',12,CINZA);doc.text(lat(m.texto),MX,y);y+=8}
+ justificado(m.resumida,MX,W,13)}
+ if(sel==='tudo'||sel==='longa'){parte(3,'Mensagem completa');
+ if(m.leituraBib){titulo('Leitura bíblica',15);justificado(m.leituraBib,MX+6,W-6,12,'italic')}
+ if(comRelato(m))sec('O relato',m.relato);
+ if(m.tema){y+=3;const y0=y-4;justificado(m.tema,MX+6,W-6,13,'italic');doc.setDrawColor(...OURO);doc.setLineWidth(1.2);doc.line(MX+1,y0,MX+1,y-lh(13)*0.6)}
+ sec('Introdução',m.intro);
+ m.pontos.filter(p=>p.titulo||p.texto).forEach((p,i)=>{titulo(`${i+1}. ${p.titulo||''}`,15);justificado(p.texto,MX,W,12)});
+ sec('Ilustrações',m.ilustracoes);sec('Aplicação',m.aplicacao);sec('Aplicação profética',m.profetica);sec('Conclusão e apelo',m.conclusao);
+ const PG=pregOrd(m);if(PG.length){titulo('Onde foi pregada',15);fonte('normal',11);PG.forEach(e=>{const t=lat([dataBR(e.data),e.igreja,e.cidade,e.ocasiao].filter(Boolean).join('  ·  '));doc.splitTextToSize(t,W-7).forEach((ln,i)=>{cabe(lh(11));if(i===0){doc.setFillColor(...OURO);doc.circle(MX+1.6,y-1.3,0.8,'F')}doc.text(ln,MX+7,y);y+=lh(11)});y+=1})}
+ const ns=FONTES.filter(b=>(m.notas||{})[b.k]);
+ if(ns.length){y+=4;cabe(20);doc.setDrawColor(...OURO);doc.setLineWidth(0.3);doc.line(MX+W/2-15,y,MX+W/2+15,y);y+=4;titulo('Notas de estudo',15);
+  ns.forEach(b=>{cabe(12);fonte('bold',12,b.c.match(/\w\w/g).map(h=>parseInt(h,16)));doc.text(lat(b.n),MX,y);y+=lh(12)+0.5;justificado(m.notas[b.k],MX,W,11)})}
+ }
+ const n=doc.getNumberOfPages();
+ for(let i=1;i<=n;i++){doc.setPage(i);fonte('normal',9,CINZA);doc.text(lat([m.titulo,m._pub?String(m.autor||'').split(' · ')[0]:autor()].filter(Boolean).join(' - ')),MX,PH-12);doc.text(`${i} / ${n}`,PW-MX,PH-12,{align:'right'})}
+ return doc.output('blob');
+}
+$('rPdf').onclick=$('rPdf2').onclick=()=>abrirExp('pdf');$('rCopiar2').onclick=()=>abrirExp('copiar');
+$('ePdf').onclick=async e=>{
+ const b=e.currentTarget,s=expSel();
+ if(!window.jspdf){toast('Gerador de PDF ainda carregando — tente de novo');return}
+ if(!downloads){toast('Para compartilhar o PDF, abra o Púlpito pelo app ou site do Claude. Enquanto isso, use Copiar texto.');return}
+ b.classList.add('busy');
+ try{
+  const nome=(norm(atual.titulo||'mensagem').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'mensagem')+NOMES_EXP[s]+'.pdf';
+  const r=await downloads.save({filename:nome,data:gerarPDF(atual,s)});$('dlgExp').classList.remove('on');
+  if(r&&r.status==='saved')toast('PDF pronto para compartilhar');
+ }catch(err){const c=err&&err.code;if(c!=='declined')toast(c==='rate_limited'?'Aguarde um instante e tente de novo':'Não foi possível gerar o PDF');if(['unavailable','not_granted','capability_disabled','capability_removed'].includes(c))b.hidden=true}
+ finally{b.classList.remove('busy')}
+};
+
+/* ---------- IA ---------- */
+const versao=()=>perfil.versao||VERSAO_PADRAO;
+const doutrina=()=>(CFG.doutrina&&CFG.doutrina.trim())||DOUTRINA_PADRAO;
+const SIMB_ICM=`SIMBOLOGIA USADA NA OBRA (use quando o texto trouxer estes elementos):
+- Objetos: água = Espírito Santo/Jesus; aliança/anel = concerto; arco = servo; areia = religião; rocha = Jesus/Palavra; barba = maturidade; barro e vaso = homem; cabelo = pensamentos; cajado = direção do Espírito; cama = comodismo; candeia = vida espiritual/coração; capa babilônica = religião; capacete = salvação; carne = pecado; carro, navio, trem e criança = Obra; casa = vida espiritual; castiçal = Jesus; chave = revelação/solução; chuva = bênção; cinto = justiça/ajuste; dente = corpo/testemunho; escudo = fé; espada, martelo, machado, prumo, rede e semente = Palavra; espelho = Palavra/revelação; flecha = revelação; fogo = prova/poder do Espírito; fogo estranho = culto profano/recurso humano; incenso = orações/louvor; joias = ornamentos espirituais do coração; linho = santidade; mãos = ministério/trabalho; mar = mundo; mármore = perfeição/santidade; mesa = comunhão/grupos; muleta e óculos = recurso humano; mulher = Igreja; orvalho e vento suave = Espírito Santo; vento forte e tempestade = lutas/tribulação; palha = religião/aparência; pedras preciosas = dons espirituais; pérola = Jesus; pés = caminhada; pescoço, roda e rosa = comunhão; porta = coração; sapato = preparo do Evangelho; tranças = orações/ordens; vestes = salvação/condição espiritual; véu = incredulidade/separação; Rute = Igreja Fiel; Vasti = igreja infiel.
+- Alimentos: fermento = aparência/vaidade; joio = infiel; leite = primeiro alimento; maná = Jesus; mel = Palavra revelada; óleo = unção do Espírito; pão = Jesus/Palavra/Corpo; pão velho = palavra sem vida; trigo = fiel/alimento para a alma; vinho = alegria do Espírito.
+- Animais: águia = Jesus/Deus; bode = infiel/rebelde; cão = inimigo/infiel; cavalo = poder/soberba/homem; galinha = proteção; jumento = humildade; leão = Jesus (ou a carne); lobo = maligno; ovelha = servo; pavão = vaidade; peixe = vidas; pomba = Espírito Santo; porco, raposa e mosca = pecado; sapo = mundano; serpente = inimigo; tartaruga = preguiça; urso = frieza; mula = obstinação.
+- Plantas: árvore e madeira = homem; espinheiro = maligno; figueira = Israel político; oliveira = Jesus/Israel espiritual; flores = dons espirituais; frutos = atos; lírio = Jesus/servo; mirra = sofrimento; videira = Igreja/Jesus; vinha = bênção/Igreja.
+- Metais: ouro = poder de Deus; prata = redenção; cobre/bronze = justiça; ferro = poder/dureza.
+- Cores: branco = santidade; vermelho = sangue de Jesus/libertação; azul = amor de Deus; amarelo = poder de Deus; verde = aliança; púrpura = realeza; preto = opressão; cinza = humildade; roxo = transbordar do Espírito.
+- Números: 1 = Jesus; 2 = comunhão; 3 = Trindade; 4 = Evangelhos; 5 = ministérios/meios de graça; 6 = homem; 7 = perfeição; 8 = graça; 9 = dons espirituais; 10 = lei; 12 = doutrina; 13 = rebelião; 40 = provação; 50 = Pentecostes; 100 = bênção completa; 666 = besta; 1000 anos = um dia para o Senhor.
+- O dia eterno: madrugada = velha dispensação; amanhecer = Pentecostes; meio-dia = lutas internas; tarde = lutas externas; entardecer = anseio pelo arrebatamento; noite = momento atual; meia-noite = a vinda; aurora = Igreja arrebatada.
+- Tipos de Jesus: Isaque, José, Moisés, Davi, Melquisedeque. Meios de graça: oração, louvor, jejum, madrugada, Palavra. Colunas da Obra: clamor pelo sangue de Jesus, dons espirituais, consulta à Palavra, grupo de intercessão.
+- Definições: revelação = conhecimento do plano de Deus; Obra = execução do plano de Deus; doutrina = o que emerge da Palavra pela operação do Espírito Santo no Corpo; salvação = eleição (o Pai), chamado (o Filho) e processo (o Espírito Santo).`;
+const ESTILO_ICM=`ESTILO DAS MENSAGENS DA IGREJA CRISTÃ MARANATA (siga este modo de pensar e de desenvolver):
+- Estrutura: título curto e marcante (muitas vezes uma frase do próprio texto ou uma figura, como "Jesus, o Altar" ou "A Candeia"); texto-base lido; INTRODUÇÃO breve que situa o personagem, o fato ou o costume e faz a ponte para a Igreja hoje; DESENVOLVIMENTO em pontos numerados (1, 2, 3…) com subitens (a, b, c) e frases curtas e afirmativas; CONCLUSÃO breve, com apelo direto ao servo e à Igreja.
+- Leitura tipológica e profética: personagens, objetos, números, lugares, costumes e o significado dos nomes no hebraico ou no grego são "tipo de", "figura de" ou "representam" Cristo, a Igreja Fiel (a Noiva), o servo, o homem sem Deus, o mundo, o adversário ou a religião sem revelação. Explique o costume da época e tire dele a lição espiritual (ex.: o dote, a candeia e o azeite de reserva na festa de casamento). Faça o paralelo profético com a Obra nesta última hora.
+- Cristocentrismo: todo o texto conduz ao Senhor Jesus, ao Cordeiro e ao Seu sangue; o projeto de Deus para o homem é a salvação em Jesus.
+- Ênfases da Obra: o clamor pelo sangue de Jesus, a oração (clamor, louvor e intercessão, orando ao Pai em nome de Jesus), a consulta à Palavra, o batismo com o Espírito Santo e os dons espirituais, o jejum, a imposição de mãos, o louvor como meio de graça, o culto profético, a comunhão e a vida no Corpo, a santificação, a vigilância, a obediência à revelação, o preparo da Igreja para o arrebatamento, os sinais do momento atual, Israel no plano profético e a volta do Senhor Jesus ("Maranata, ora vem, Senhor Jesus").
+- Vocabulário próprio: "o Senhor Jesus", "a Obra", "esta Obra", "a Igreja Fiel", "a Noiva", "o servo", "os servos", "o Corpo", "a revelação", "a Palavra revelada", "o projeto de Deus", "nesta última hora", "o momento atual", "o relógio de Deus", "o adversário", "a comunhão", "o arrebatamento", "o Espírito Santo".
+- Tom: pastoral, firme e direto, de exortação e consolo; linguagem simples, que o irmão mais simples entende; perguntas retóricas ("Onde está o Cordeiro?"); aplicações na primeira pessoa do plural ("nós", "a Igreja", "o servo"); "meus irmãos" e "amados" com moderação.
+- Desenvolvimento frase a frase: tome as expressões do próprio versículo como subtítulos e aplique cada uma ("Levanta-te depressa – …", "Cinge-te – …", "Betume por dentro: …"), mostrando um processo espiritual em etapas.
+- Vida da Obra: o Corpo e a comunhão, a assistência ao novo convertido, o grupo de intercessão que discerne pela Palavra, sob o clamor, as mensagens dos dons, o culto profético, a ordem no culto e o ministério (pastor, presbítero, diácono, obreiro).
+- Cuidados: não marque datas para a volta do Senhor; não ataque pessoas nem outras igrejas pelo nome; não afirme fatos históricos ou atuais que não sejam bem estabelecidos.`;
+const REGRAS=()=>`LINHA DOUTRINÁRIA (obrigatória em todo o conteúdo):
+${doutrina()}
+
+ESTILO: mensagem profunda, reverente e calorosa, que toque o coração dos ouvintes e demonstre elevado conhecimento bíblico. Seja rico em detalhes históricos verificáveis: época e datas aproximadas, geografia, costumes, cultura, situação política e religiosa, significado de palavras-chave no hebraico ou no grego. Una a Escritura com a própria Escritura. Quando houver tipos, figuras e sombras, mostre como apontam para Cristo e para a Igreja.
+
+CITAÇÕES: sempre que citar um versículo, identifique a referência e transcreva o texto na versão ${versao()}, entre aspas, seguido da referência entre parênteses — por exemplo: "texto do versículo" (João 15:5). Transcreva citações curtas (até 4 versículos por vez). Nunca invente versículos nem atribua a um versículo palavras que ele não contém; se não tiver certeza do texto exato, cite apenas a referência.
+
+FONTES: não transcreva notas impressas das Bíblias de estudo nem dos comentários, manuais e dicionários (Wiersbe, Moody, Manual SBB, MacArthur); use com palavras próprias a linha de interpretação característica de cada obra. Não invente fatos históricos, citações de autores nem testemunhos de pessoas reais.
+
+${ESTILO_ICM}
+
+${SIMB_ICM}
+
+FORMATO: português do Brasil, texto simples (sem markdown, sem asteriscos), parágrafos separados por quebra de linha.`;
+const orient=m=>{const o=[['Contexto da mensagem',m.contexto],['Por que esta passagem foi escolhida',m.escolha],['Dons espirituais recebidos para o culto (direcionam o sentido da mensagem)',m.dons],['Descrição da mensagem',m.descricao],['Comentários do pregador',m.comentarios],['Linha de desenvolvimento',m.linha],['Objetivos',m.objetivos],['Aplicações desejadas',m.aplicDesej]].filter(x=>x[1]&&x[1].trim());return o.length?'\n\nORIENTAÇÕES DO PREGADOR (siga fielmente):\n'+o.map(x=>`${x[0]}: ${x[1].trim()}`).join('\n'):''};
+const ctx=m=>`Texto-base: ${m.texto||'(não informado)'}\nTítulo: ${m.titulo||'(não informado)'}\nSérie: ${m.serie||'(nenhuma)'}\nTipo de sermão: ${m.tipo}\nTema: ${m.tema||'(não informado)'}\nPúblico: ${m.publico||'igreja em geral'}\nOcasião: ${m.local||'culto'}${orient(m)}`;
+async function pedir(btn,prompt,json,rotulo){
+ if(navigator.onLine===false){toast('Sem internet: gerar com o assistente precisa de conexão');return null}
+ if(!sample){toast('Assistente indisponível nesta visualização');return null}
+ if(!atual.texto&&!atual.tema&&!atual.contexto){toast('Informe o texto-base ou o tema primeiro');return null}
+ const txt=btn.textContent;btn.classList.add('busy');btn.textContent=rotulo||'Estudando…';
+ try{return json?await sample.json(prompt,{modelTier:'complex'}):(await sample(prompt,{modelTier:'complex'})).text}
+ catch(e){toast(e&&e.code==='rate_limited'?'Muitos pedidos — aguarde um pouco':'Não foi possível gerar agora');return null}
+ finally{btn.classList.remove('busy');btn.textContent=txt}
+}
+function preencher(m,campo,r,acrescentar){if(!r||atual!==m)return false;const v=r.trim();m[campo]=acrescentar&&m[campo]?m[campo]+'\n\n'+v:v;$(campo).value=m[campo];agendar();return true}
+$('gLeitura').onclick=async e=>{
+ const m=atual;if(!m.texto){toast('Informe o texto-base primeiro');return}
+ const r=await pedir(e.currentTarget,`Transcreva o texto bíblico ${m.texto} na versão ${versao()}, um versículo por linha, cada linha começando pelo número do versículo. Se a passagem tiver mais de 15 versículos, transcreva os versículos centrais da mensagem e indique entre colchetes os que foram resumidos. Não acrescente comentários. Não invente palavras: se não tiver certeza do texto exato de um versículo, escreva apenas o número e "[conferir na Bíblia]".`);
+ if(preencher(m,'leituraBib',r))toast('Texto-base transcrito — confira na sua Bíblia');
+};
+$('gRelato').onclick=async e=>{
+ const m=atual;
+ const r=await pedir(e.currentTarget,`Você auxilia um pregador a preparar uma mensagem.\n${ctx(m)}\n\nNarre o relato do texto bíblico (a história), como um pregador que conduz os ouvintes para dentro da cena: quem são os personagens, onde e quando acontece, a situação política, religiosa e social da época, os costumes envolvidos, o que acontece passo a passo e o clímax da narrativa. Se o texto não for narrativo (epístola, salmo, profecia), narre a história por trás dele: autor, destinatários, ocasião e o que estava acontecendo. Entre 400 e 600 palavras, em parágrafos.\n\n${REGRAS()}`);
+ if(preencher(m,'relato',r)){m.incluirRelato=true;$('incluirRelato').checked=true;toast('Relato gerado')}
+};
+$('gProf').onclick=async e=>{
+ const m=atual;
+ const corpo=[m.tema,...m.pontos.map(p=>p.titulo)].filter(Boolean).join('; ');
+ const acv=await acvBuscar(m,{max:3,limite:4500,termosExtra:'arrebatamento noiva volta profecia vigilancia'});
+ const r=await pedir(e.currentTarget,`${acvBloco(acv)}\n\n${ctx(m)}\nPontos da mensagem: ${corpo||'(ainda não definidos)'}\n\nDesenvolva a aplicação profética deste texto para a Igreja nesta última hora: o que ele revela sobre o preparo da Noiva, a vigilância, a obra do Espírito Santo, os sinais dos tempos e a volta do Senhor Jesus para arrebatar a Sua Igreja. Mostre tipos e figuras do texto que apontam para esses acontecimentos, fundamentando cada afirmação em textos proféticos (Daniel, Mateus 24, 1 Tessalonicenses 4, Apocalipse e outros) com as citações transcritas. Não marque datas. 3 a 4 parágrafos.\n\n${REGRAS()}`);
+ if(preencher(m,'profetica',r,true))toast('Aplicação profética desenvolvida');
+};
+$('perspectiva').onclick=async e=>{
+ const k=aba,b=FONTES.find(x=>x.k===k),m=atual;
+ const r=await pedir(e.currentTarget,`Você auxilia um pregador a preparar uma mensagem.\n${ctx(m)}\n\nEscreva anotações de estudo sobre o texto-base seguindo a linha característica de ${b.n} (${b.f}). Organize em tópicos curtos, um por linha: contexto histórico, observações exegéticas, ${k==='thompson'?'cadeia temática de referências cruzadas,':''}${k==='scofield'?'leitura dispensacional e tipologia,':''}${k==='wiersbe'?'esboço expositivo memorável e aplicação prática,':''} doutrina central e pistas para a pregação. Até 350 palavras.\n\n${REGRAS()}`);
+ if(r&&atual===m){m.notas=m.notas||{};const ant=m.notas[k]||'';m.notas[k]=(ant?ant+'\n\n':'')+r.trim();if(aba===k)$('nota').value=m.notas[k];agendar();toast('Estudo adicionado')}
+};
+$('ilus').onclick=async e=>{
+ const m=atual;const r=await pedir(e.currentTarget,`${ctx(m)}\n\nSugira 4 ilustrações para esta mensagem: um paralelo bíblico, um costume da época bíblica que esclareça o texto, uma imagem da natureza e uma cena do cotidiano. Cada uma em 2 a 4 frases, uma por parágrafo.\n\n${REGRAS()}`);
+ if(preencher(m,'ilustracoes',r,true))toast('Ilustrações adicionadas');
+};
+$('gTopicos').onclick=async e=>{
+ const m=atual;
+ const corpo=[m.tema,m.intro,...m.pontos.map(p=>p.titulo+': '+p.texto),m.aplicacao,m.profetica,m.conclusao].filter(s=>s&&s.trim()).join('\n');
+ if(!corpo.trim()){toast('Escreva ou gere a mensagem antes do resumo');return}
+ const r=await pedir(e.currentTarget,`Resuma esta mensagem bíblica em 6 a 8 tópicos (bullet points) objetivos, na ordem da mensagem: tema, cada ponto principal com sua referência, aplicação, aplicação profética e apelo final. Um tópico por linha, cada um com no máximo 25 palavras, sem marcadores nem numeração no início, sem transcrever versículos.\n\n${ctx(m)}\n\nMENSAGEM:\n${corpo}\n\nLinha doutrinária: ${doutrina()}`);
+ if(r&&atual===m){m.topicos=linhas(r).join('\n');$('topicos').value=m.topicos;agendar();toast('Resumo em tópicos criado')}
+};
+async function desenvolver(m,btn,rotulo){
+ const rel=comRelato(m),temLinha=!!(m.linha&&m.linha.trim());
+ const acv=await acvBuscar(m,{max:5,limite:8000});m.acervoUsado=acv.map(c=>`${c.t||'Trecho'} (${c.ap})`);
+ const r=await pedir(btn,`Você auxilia um pregador a desenvolver um sermão completo.\n${ctx(m)}\n\nCOMO USAR AS ORIENTAÇÕES: ${m.dons&&m.dons.trim()?'DONS ESPIRITUAIS: o que o Senhor falou pelos dons dá a direção da mensagem. Identifique o sentido dessa direção (consolo, exortação, edificação, chamada ao arrependimento, preparo para a volta do Senhor, restauração…) e faça o tema, os pontos, a aplicação, a aplicação profética e o apelo caminharem nessa direção, confirmando cada ponto pela Palavra, como a Obra confere os dons pela Palavra. Na introdução ou na conclusão, mostre com discrição como o texto confirma essa direção, sem repetir literalmente as palavras dos dons, sem tratá-las como versículo e sem acrescentar revelações que não foram dadas. ':''}${temLinha?'a linha de desenvolvimento define os pontos da mensagem: mantenha a ordem e a ideia de cada item, desenvolvendo-os com profundidade. ':''}A descrição e os comentários do pregador devem aparecer incorporados na mensagem. Os objetivos e as aplicações desejadas orientam a aplicação, a aplicação profética e o apelo. Identifique todos os textos bíblicos mencionados nas orientações e transcreva-os com a referência onde forem usados.\n\nConsidere as linhas de estudo destas fontes e integre o que cada uma contribui:\n${FONTES.map(b=>`- ${b.n}: ${b.f}`).join('\n')}\n\nDevolva SOMENTE um objeto JSON com as chaves:
+"titulo": sugestão de título;
+"leitura": o texto-base transcrito na versão ${versao()}, um versículo por linha começando pelo número (se passar de 15 versículos, só os centrais);
+${rel?'"relato": a história do texto narrada com riqueza de detalhes históricos, culturais e geográficos (400 a 600 palavras, em parágrafos);\n':''}"tema": a grande verdade da mensagem em uma frase;
+"intro": introdução de 2 parágrafos que prenda a atenção;
+"pontos": array de ${temLinha?'objetos, um para cada item da linha de desenvolvimento,':'3 a 4 objetos'} {"titulo","texto"}; cada texto com 3 a 4 parágrafos: explicação do texto com detalhes históricos e do original, versículos de apoio transcritos com referência, e aplicação ao coração;
+"aplicacao": aplicação prática para a vida do crente (2 parágrafos);
+"profetica": aplicação profética para a Igreja nesta última hora, com textos proféticos transcritos (2 a 3 parágrafos);
+"conclusao": conclusão com apelo que toque os ouvintes (2 parágrafos);
+"topicos": array de 6 a 8 frases curtas resumindo a mensagem em bullet points;
+"resumida": mensagem resumida e tonificada para breve leitura antes da pregação: 250 a 400 palavras, tom firme, vibrante e inspirador, frases curtas e fortes, parágrafos curtos; traga um versículo-chave transcrito com a referência, condense os pontos centrais, inclua uma nota profética e termine com um apelo breve e marcante;
+"notas": objeto com as chaves ${FONTES.map(f=>f.k).join(', ')}, cada uma com 2 a 4 tópicos curtos separados por quebra de linha, mostrando como aquela linha de estudo ilumina o texto.
+Dentro das strings, separe parágrafos com \\n.${acvBloco(acv)}\n\n${REGRAS()}`,true,rotulo);
+ if(!r||atual!==m)return false;
+ const mapa={titulo:'titulo',leitura:'leituraBib',relato:'relato',tema:'tema',intro:'intro',aplicacao:'aplicacao',profetica:'profetica',conclusao:'conclusao',resumida:'resumida'};
+ Object.entries(mapa).forEach(([k,c])=>{if(!m[c]&&r[k])m[c]=String(r[k])});
+ if(!m.topicos&&r.topicos)m.topicos=(Array.isArray(r.topicos)?r.topicos:linhas(r.topicos)).map(String).join('\n');
+ if(m.pontos.every(p=>!p.titulo&&!p.texto)&&Array.isArray(r.pontos))m.pontos=r.pontos.map(p=>({titulo:String(p.titulo||''),texto:String(p.texto||'')}));
+ m.notas=m.notas||{};if(r.notas)FONTES.forEach(b=>{if(!m.notas[b.k]&&r.notas[b.k])m.notas[b.k]=String(r.notas[b.k])});
+ return true;
+}
+$('gerar').onclick=async e=>{
+ const m=atual;if(!await desenvolver(m,e.currentTarget))return;
+ carregarEditor();agendar();toast('Mensagem pronta. Confira as citações e toque em Salvar mensagem');
+};
+$('gResumida').onclick=async e=>{
+ const m=atual;
+ const corpo=[m.tema,m.intro,...m.pontos.map(p=>p.titulo+': '+p.texto),m.aplicacao,m.profetica,m.conclusao].filter(s=>s&&s.trim()).join('\n');
+ const r=await pedir(e.currentTarget,`${ctx(m)}\n\n${corpo?'MENSAGEM COMPLETA:\n'+corpo+'\n\n':''}Escreva a mensagem resumida e tonificada para breve leitura antes da pregação: 250 a 400 palavras, tom firme, vibrante e inspirador, frases curtas e fortes, parágrafos curtos; traga um versículo-chave transcrito com a referência, condense os pontos centrais, inclua uma nota profética e termine com um apelo breve e marcante. Sem títulos nem listas.\n\n${REGRAS()}`);
+ if(r&&atual===m){m.resumida=r.trim();$('resumida').value=m.resumida;agendar();toast('Mensagem resumida criada')}
+};
+document.addEventListener('click',e=>{const b=e.target.closest('.chipd');if(!b)return;const t=$(b.closest('.chips').dataset.alvo);const pre=t.value.trim()?t.value.replace(/\s*$/,'')+'\n':'';t.value=pre+b.dataset.dom+': ';t.focus();t.setSelectionRange(t.value.length,t.value.length);t.dispatchEvent(new Event('input',{bubbles:true}))});
+/* criação rápida */
+let qModo='pass';
+document.querySelector('.modo').addEventListener('click',e=>{const b=e.target.closest('[data-qm]');if(!b)return;qModo=b.dataset.qm;
+ document.querySelectorAll('.modo [data-qm]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.qm===qModo));
+ const ctx=qModo==='ctx';$('qPassBox').hidden=ctx;$('qCtxBox').hidden=!ctx;$('qTexto').required=!ctx;$('qContexto').required=ctx;
+ $('qGerar').textContent=ctx?($('qAuto').checked?'✦ Escolher passagem e desenvolver':'✦ Sugerir passagens'):'✦ Desenvolver mensagem completa';$('qSug').hidden=true;(ctx?$('qContexto'):$('qTexto')).focus()});
+async function escolherPassagem(m){
+ const r=await pedir($('qGerar'),`Você auxilia um pregador a escolher o texto bíblico de uma mensagem.\nCONTEXTO DA MENSAGEM: ${m.contexto}${orient({...m,contexto:'',escolha:''})}\nTipo de sermão: ${m.tipo}. Público: ${m.publico||'igreja em geral'}. Ocasião: ${m.local||'culto'}.${comRelato(m)?'\nO pregador gosta de narrar o relato (a história) do texto: prefira, quando adequado, uma passagem narrativa com personagens e acontecimentos.':''}\nLinha doutrinária: ${doutrina()}\n\nEscolha UMA passagem principal (de 3 a 20 versículos, um trecho com unidade de sentido) que seja a mais adequada a esse contexto e que permita desenvolver a mensagem com profundidade, relato histórico e aplicação profética. Sugira também 2 alternativas.\nDevolva SOMENTE um objeto JSON: {"ref":"Livro capítulo:versículo-versículo","motivo":"2 a 3 frases explicando por que esta passagem atende ao contexto","alternativas":[{"ref":"...","motivo":"uma frase"}]}. Use nomes de livros em português por extenso (ex.: 1 Reis, Mateus).`,true,'Identificando a passagem…');
+ if(!r||!r.ref)return false;
+ let ref=String(r.ref).trim();
+ try{await bCarregar();const pp=bParse(ref);if(pp){const L=BIB.dados[pp.l];ref=`${L[1]} ${pp.c+1}${pp.v?':'+pp.v+(pp.v2?'-'+pp.v2:''):''}`}}catch(e){}
+ m.texto=ref;m.escolha=String(r.motivo||'').trim();
+ m.alternativas=(Array.isArray(r.alternativas)?r.alternativas:[]).filter(a=>a&&a.ref).map(a=>`${a.ref}${a.motivo?' — '+a.motivo:''}`).join('; ');
+ return true;
+}
+
+let qPend=null,qSugs=[];
+function refNorm(ref){try{const pp=bParse(ref);if(pp){const L=BIB.dados[pp.l];return {ref:`${L[1]} ${pp.c+1}${pp.v?':'+pp.v+(pp.v2?'-'+pp.v2:''):''}`,pp}}}catch(e){}return {ref:String(ref).trim(),pp:null}}
+async function sugerirPassagens(m,qtd,evitar){
+ const acv=await acvBuscar({...m,texto:''},{max:8,limite:3500});
+ const r=await pedir($('qGerar'),`Você auxilia um pregador a escolher o texto bíblico de uma mensagem.\nCONTEXTO DA MENSAGEM: ${m.contexto}${orient({...m,contexto:'',escolha:''})}\nTipo de sermão: ${m.tipo}. Público: ${m.publico||'igreja em geral'}. Ocasião: ${m.local||'culto'}.${comRelato(m)?'\nO pregador gosta de narrar o relato (a história) do texto: inclua passagens narrativas com personagens e acontecimentos, sem deixar de lado outros gêneros quando forem muito adequados.':''}\nLinha doutrinária: ${doutrina()}${evitar&&evitar.length?`\nNÃO repita estas passagens já sugeridas: ${evitar.join('; ')}.`:''}\n\nSugira ${qtd} passagens bíblicas diferentes (cada uma de 3 a 20 versículos, um trecho com unidade de sentido), variadas entre Antigo e Novo Testamento, que se enquadrem nesse contexto e permitam desenvolver a mensagem com profundidade, relato histórico e aplicação profética. Ordene da MAIS adequada para a menos adequada.\nDevolva SOMENTE um objeto JSON: {"passagens":[{"ref":"Livro capítulo:versículo-versículo","titulo":"título curto do texto","motivo":"1 a 2 frases dizendo por que atende ao contexto"}]}. Use nomes de livros em português por extenso.${acv.length?`\n\nMensagens do acervo de apostilas da ICM do pregador relacionadas a este contexto (considere os textos bíblicos e as linhas de pensamento delas entre as sugestões):\n${acv.map(c=>`- ${c.t||'Trecho'} (${c.ap}): ${c.x.slice(0,350)}…`).join('\n')}`:''}`,true,'Analisando o contexto…');
+ if(!r||!Array.isArray(r.passagens))return null;
+ try{await bCarregar()}catch(e){}
+ const vistos=new Set(evitar||[]);
+ return r.passagens.filter(x=>x&&x.ref).map(x=>{const n=refNorm(x.ref);return {...x,ref:n.ref,pp:n.pp}}).filter(x=>{if(vistos.has(x.ref))return false;vistos.add(x.ref);return true});
+}
+function previa(x){if(!x.pp||!BIB.dados)return '';const {l,c,v,v2}=x.pp,vs=BIB.dados[l][2][c];if(!vs)return '';const a=v||1,b=Math.min(v2||a+1,a+2,vs.length);let t=vs.slice(a-1,b).map((s,k)=>`${a+k} ${bLimpo(s)}`).join(' ');if(t.length>230)t=t.slice(0,230).replace(/\s\S*$/,'')+'…';return t}
+function renderSugs(){
+ const S=$('qSug');S.hidden=false;
+ S.innerHTML=`<h3>Escolha o texto bíblico</h3><p>${qSugs.length} passagens que se enquadram no seu contexto, da mais para a menos indicada.</p>
+ <div class="sopts" role="radiogroup" aria-label="Passagens sugeridas">${qSugs.map((x,i)=>`<label class="sop"><input type="radio" name="qSel" value="${i}"${i===0?' checked':''}><span><span class="n">${i+1}. ${esc(x.ref)}</span>${i===0?'<span class="top1">Mais indicada</span>':''}${x.titulo?`<span class="tt">${esc(x.titulo)}</span>`:''}<span class="mo">${esc(x.motivo||'')}</span></span>${previa(x)?`<q>${esc(previa(x))}</q>`:''}</label>`).join('')}</div>
+ <div class="sbtns"><button type="button" class="pri" id="qUsar">✦ Gerar com a passagem escolhida</button><button type="button" id="qAutoBtn">Escolha automática</button><button type="button" id="qMais">Sugerir outras 10</button><button type="button" id="qCancelSug">Cancelar</button></div>`;
+ requestAnimationFrame(()=>S.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'}));
+}
+async function gerarComEscolha(m,i){
+ const x=qSugs[i];if(!x)return;
+ m.texto=x.ref;m.escolha=[x.titulo,x.motivo].filter(Boolean).join(' — ');
+ m.alternativas=qSugs.filter((_,k)=>k!==i).slice(0,3).map(a=>a.ref).join('; ');
+ $('qSug').hidden=true;await concluirGeracao(m);
+}
+async function concluirGeracao(m){
+ atual=m;$('qStatus').textContent=`Desenvolvendo a mensagem sobre ${m.texto}…`;
+ const ok=await desenvolver(m,$('qGerar'),'Desenvolvendo a mensagem…');
+ if(!ok){if(atual===m)atual=null;$('qStatus').textContent='Não foi possível concluir. Suas orientações continuam aqui — tente de novo.';if(qSugs.length&&qModo==='ctx')renderSugs();return}
+ msgs.push(m);await salvar(m);qPend=null;qSugs=[];$('qSug').hidden=true;
+ $('fRapida').reset();$('qRelato').checked=true;$('qGerar').textContent=qModo==='ctx'?'✦ Sugerir passagens':'✦ Desenvolver mensagem completa';$('qStatus').textContent='Leva cerca de um minuto. Você revisa o resultado antes de salvar.';
+ setModulo('dev');renderLeitura();vista('read');toast('Mensagem desenvolvida. Revise e toque em Salvar mensagem');
+}
+$('qSug').addEventListener('click',async e=>{
+ const id=e.target.id,m=qPend;if(!m)return;
+ if(id==='qUsar'){const i=+((document.querySelector('input[name=qSel]:checked')||{}).value||0);await gerarComEscolha(m,i)}
+ else if(id==='qAutoBtn'){toast('Escolha automática: '+qSugs[0].ref);await gerarComEscolha(m,0)}
+ else if(id==='qCancelSug'){$('qSug').hidden=true;qPend=null;qSugs=[];$('qStatus').textContent='Leva cerca de um minuto. Você revisa o resultado antes de salvar.'}
+ else if(id==='qMais'){const b=e.target;b.classList.add('busy');atual=m;const novas=await sugerirPassagens(m,10,qSugs.map(x=>x.ref));b.classList.remove('busy');if(novas&&novas.length){qSugs=novas;renderSugs()}else toast('Não foi possível sugerir outras agora')}
+});
+$('qAuto').onchange=()=>{$('qGerar').textContent=$('qAuto').checked?'✦ Escolher passagem e desenvolver':'✦ Sugerir passagens'};
+
+$('fRapida').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!sample){toast('O assistente não está disponível nesta visualização');return}
+ const v=id=>$(id).value.trim(),m=nova();
+ Object.assign(m,{contexto:qModo==='ctx'?v('qContexto'):'',texto:qModo==='ctx'?'':v('qTexto'),dons:v('qDons'),descricao:v('qDescricao'),comentarios:v('qComentarios'),linha:v('qLinha'),objetivos:v('qObjetivos'),aplicDesej:v('qAplic'),incluirRelato:$('qRelato').checked,tipo:$('qTipo').value,serie:v('qSerie'),data:$('qData').value,local:v('qLocal'),publico:v('qPublico')});
+ atual=m;
+ if(qModo==='ctx'){
+  if(!m.contexto){toast('Descreva o contexto da mensagem');return}
+  $('qStatus').textContent='Lendo o contexto e procurando passagens bíblicas adequadas…';$('qSug').hidden=true;
+  const auto=$('qAuto').checked,lista=await sugerirPassagens(m,auto?5:10);
+  if(!lista||!lista.length||atual!==m){if(atual===m)atual=null;$('qStatus').textContent='Não foi possível identificar passagens. Seu contexto continua aqui — tente de novo.';return}
+  qPend=m;qSugs=lista;
+  if(auto){toast('Escolha automática: '+lista[0].ref);await gerarComEscolha(m,0);return}
+  $('qStatus').textContent='Escolha uma das passagens abaixo para gerar a mensagem.';renderSugs();return;
+ }
+ $('qStatus').textContent=`Desenvolvendo a mensagem sobre ${m.texto}…`;
+ const ok=await desenvolver(m,$('qGerar'),'Desenvolvendo a mensagem…');
+ if(!ok){if(atual===m)atual=null;$('qStatus').textContent='Não foi possível concluir. Suas orientações continuam aqui — tente de novo.';return}
+ msgs.push(m);await salvar(m);
+ $('fRapida').reset();$('qRelato').checked=true;$('qGerar').textContent=qModo==='ctx'?'✦ Identificar passagem e desenvolver':'✦ Desenvolver mensagem completa';$('qStatus').textContent='Leva cerca de um minuto. Você revisa o resultado antes de salvar.';
+ setModulo('dev');renderLeitura();vista('read');toast('Mensagem desenvolvida. Revise e toque em Salvar mensagem');
+});
+$('rSalvar').onclick=async()=>{
+ const m=atual;m.status='Pronta';if(!m.titulo.trim())m.titulo='Mensagem de '+new Date().toLocaleDateString('pt-BR');
+ await salvar(m);toast('Mensagem salva em “Minhas mensagens”');setModulo('gest');renderLeitura();vista('read');
+};
+
+
+/* ---------- BÍBLIA ---------- */
+const BIB={dados:null,carregando:null,norm:null,livro:0,cap:0,sel:new Set(),dest:{},bfs:20};
+BIB.bfs=ls.get('pulpito-bfs',20);
+const bTxt=t=>esc(t).replace(/\[([^\]]*)\]/g,'<i>$1</i>');
+const bLimpo=t=>String(t).replace(/[\[\]]/g,'');
+const vid=(l,c,v)=>`${l}.${c}.${v}`;
+function bCarregar(){
+ if(BIB.dados)return Promise.resolve(BIB.dados);
+ if(!BIB.carregando)BIB.carregando=(async()=>{
+  let d=null;
+  try{d=await idb.get('biblia-v1')}catch(e){}
+  if(!d){const r=await fetch('biblia.json');if(!r.ok)throw new Error(r.status);d=(await r.json()).b;idb.set('biblia-v1',d).catch(()=>{})}
+  BIB.dados=d;bMontarSeletores();return d;
+ })().catch(e=>{BIB.carregando=null;throw e});
+ return BIB.carregando;
+}
+function bMontarSeletores(){
+ const L=BIB.dados;
+ $('bLivro').innerHTML=`<optgroup label="Antigo Testamento">${L.slice(0,39).map((b,i)=>`<option value="${i}">${esc(b[1])}</option>`).join('')}</optgroup><optgroup label="Novo Testamento">${L.slice(39).map((b,i)=>`<option value="${i+39}">${esc(b[1])}</option>`).join('')}</optgroup>`;
+ $('bLivrosSpine').innerHTML=`<li class="grp">Antigo Testamento</li><li class="blv">${L.slice(0,39).map((b,i)=>`<button data-lv="${i}" title="${esc(b[1])}">${esc(b[0])}</button>`).join('')}</li><li class="grp">Novo Testamento</li><li class="blv">${L.slice(39).map((b,i)=>`<button data-lv="${i+39}" title="${esc(b[1])}">${esc(b[0])}</button>`).join('')}</li>`;
+}
+function bIr(l,c,v,v2){
+ const L=BIB.dados;l=Math.max(0,Math.min(65,l));c=Math.max(0,Math.min(L[l][2].length-1,c||0));
+ const mudou=l!==BIB.livro||c!==BIB.cap||!$('bTexto').dataset.ok;BIB.livro=l;BIB.cap=c;ls.set('pulpito-bpos',[l,c]);
+ if(mudou){BIB.sel.clear();bSelBar()}
+ $('bLivro').value=l;
+ $('bCap').innerHTML=L[l][2].map((_,i)=>`<option value="${i}">Cap. ${i+1}</option>`).join('');$('bCap').value=c;
+ const vs=L[l][2][c];
+ $('bVers').innerHTML='<option value="">Vers.</option>'+vs.map((_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
+ const T=$('bTexto');T.dataset.ok=1;T.style.setProperty('--bfs',BIB.bfs+'px');
+ const vspan=(t,i)=>{const id=vid(l,c,i+1),d=BIB.dest[id];return `<span class="v${d?' '+d:''}${BIB.sel.has(i+1)?' sel':''}" data-v="${i+1}"><sup>${i+1}</sup>${bTxt(t)}</span>`};
+ const comOn=BIB.com&&!!sample;
+ T.innerHTML=`<h2>${esc(L[l][1])} ${c+1}</h2><p class="bsub">${l<39?'Antigo':'Novo'} Testamento · ${vs.length} versículos</p>`+(comOn?vs.map((t,i)=>`<div class="vb">${vspan(t,i)}<div class="com pend" data-com="${i+1}"></div></div>`).join(''):`<p class="vv">${vs.map((t,i)=>vspan(t,i)+' ').join('')}</p>`);
+ if(comOn)bComentarios(l,c);else $('bComSt').hidden=true;
+ $('bAnt').disabled=l===0&&c===0;$('bProx').disabled=l===65&&c===L[65][2].length-1;
+ if(v){$('bVers').value=v;const fim=v2||v;requestAnimationFrame(()=>{const els=[...T.querySelectorAll('.v')].filter(e=>+e.dataset.v>=v&&+e.dataset.v<=fim);if(els[0]){els[0].scrollIntoView({block:'center',behavior:'auto'});els.forEach(e=>{e.classList.add('flash');setTimeout(()=>e.classList.remove('flash'),2200)})}})}
+ else window.scrollTo(0,0);
+}
+async function abrirBiblia(l,c,v,v2){
+ guardar();setModulo('bib');vista('biblia');
+ try{await bCarregar()}catch(e){$('bTexto').innerHTML='<p class="note">Não foi possível carregar a Bíblia. Verifique a conexão e tente de novo.</p>';return}
+ const pos=ls.get('pulpito-bpos',[42,0]);
+ bIr(l??pos[0],c??pos[1],v,v2);
+}
+/* referências: "Jo 3:16", "1 Coríntios 13:4-7", "Salmos 23" */
+function bLivroDe(txt){
+ const L=BIB.dados,raw=txt.trim().toLowerCase();
+ const k=norm(raw).replace(/[^a-z0-9]/g,'');if(!k)return -1;
+ if(k==='jo')return /jó/.test(raw)?17:42;
+ let i=L.findIndex(b=>norm(b[0]).replace(/[^a-z0-9]/g,'')===k);if(i>=0)return i;
+ i=L.findIndex(b=>norm(b[1]).replace(/[^a-z0-9]/g,'')===k);if(i>=0)return i;
+ i=L.findIndex(b=>norm(b[1]).replace(/[^a-z0-9]/g,'').startsWith(k));return i;
+}
+function bParse(s){
+ const m=String(s).trim().match(/^(\d?\s*[^\d:]+?)\s*(\d+)?\s*(?:[:.,]\s*(\d+)(?:\s*[-–]\s*(\d+))?)?\s*$/);
+ if(!m)return null;const l=bLivroDe(m[1]);if(l<0)return null;
+ return {l,c:m[2]?+m[2]-1:0,v:m[3]?+m[3]:null,v2:m[4]?+m[4]:null};
+}
+$('bIr').addEventListener('submit',async e=>{e.preventDefault();await bCarregar();const r=bParse($('bRef').value);if(!r){toast('Referência não reconhecida. Ex.: Jo 3:16 ou Salmos 23');return}$('bResultados').hidden=true;bIr(r.l,r.c,r.v,r.v2)});
+$('bLivro').onchange=()=>bIr(+$('bLivro').value,0);
+$('bCap').onchange=()=>bIr(BIB.livro,+$('bCap').value);
+$('bVers').onchange=()=>{const v=+$('bVers').value;if(v)bIr(BIB.livro,BIB.cap,v)};
+$('bAnt').onclick=()=>{const L=BIB.dados;let{livro:l,cap:c}=BIB;if(c>0)c--;else if(l>0){l--;c=L[l][2].length-1}bIr(l,c)};
+$('bProx').onclick=()=>{const L=BIB.dados;let{livro:l,cap:c}=BIB;if(c<L[l][2].length-1)c++;else if(l<65){l++;c=0}bIr(l,c)};
+$('bMenos').onclick=()=>{BIB.bfs=Math.max(15,BIB.bfs-1);ls.set('pulpito-bfs',BIB.bfs);$('bTexto').style.setProperty('--bfs',BIB.bfs+'px')};
+$('bMais').onclick=()=>{BIB.bfs=Math.min(32,BIB.bfs+1);ls.set('pulpito-bfs',BIB.bfs);$('bTexto').style.setProperty('--bfs',BIB.bfs+'px')};
+$('bMenu').onclick=()=>{document.body.dataset.view='menu'};
+$('mBib').onclick=()=>abrirBiblia();
+$('bLivrosSpine').addEventListener('click',e=>{const b=e.target.closest('[data-lv]');if(b){abrirBiblia(+b.dataset.lv,0)}});
+
+/* seleção de versículos */
+$('bTexto').addEventListener('click',e=>{
+ if(e.target.closest('.com'))return;const s=e.target.closest('.v');if(!s)return;
+ const g=window.getSelection&&String(window.getSelection());if(g&&g.trim().length>1)return; /* seleção livre de texto: deixa copiar normalmente */
+ const n=+s.dataset.v;if(BIB.sel.has(n)){BIB.sel.delete(n);s.classList.remove('sel')}else{BIB.sel.add(n);s.classList.add('sel')}
+ bSelBar();
+});
+function faixas(ns){const a=[...ns].sort((x,y)=>x-y),r=[];for(const n of a){const u=r[r.length-1];if(u&&n===u[1]+1)u[1]=n;else r.push([n,n])}return r}
+function bRefTexto(l,c,ns){return `${BIB.dados[l][1]} ${c+1}:${faixas(ns).map(([a,b])=>a===b?a:`${a}-${b}`).join(',')}`}
+function bSelBar(){
+ const n=BIB.sel.size;$('bSel').hidden=!n;
+ if(n)$('bSelInfo').textContent=`${bRefTexto(BIB.livro,BIB.cap,BIB.sel)} · ${n} ${n>1?'versículos':'versículo'}`;
+}
+$('bLimpar').onclick=()=>{BIB.sel.clear();document.querySelectorAll('#bTexto .v.sel').forEach(e=>e.classList.remove('sel'));bSelBar()};
+$('bCopiar').onclick=async()=>{
+ const {livro:l,cap:c}=BIB,vs=BIB.dados[l][2][c],ns=[...BIB.sel].sort((a,b)=>a-b);
+ const txt=`${bRefTexto(l,c,ns)}\n${ns.map(n=>`${n} ${bLimpo(vs[n-1])}`).join('\n')}\n(Bíblia Livre)`;
+ try{await navigator.clipboard.writeText(txt);toast('Versículos copiados')}catch(e){toast('Não foi possível copiar')}
+};
+document.querySelector('#bSel .cores').addEventListener('click',e=>{
+ const b=e.target.closest('[data-cor]');if(!b)return;const cor=b.dataset.cor,{livro:l,cap:c}=BIB;
+ BIB.sel.forEach(n=>{const id=vid(l,c,n);if(cor)BIB.dest[id]=cor;else delete BIB.dest[id];const el=$('bTexto').querySelector(`.v[data-v="${n}"]`);if(el){el.classList.remove('am','vd','az','rs','sel');if(cor)el.classList.add(cor)}});
+ BIB.sel.clear();bSelBar();salvarDest();toast(cor?'Destaque aplicado':'Destaque removido');
+});
+let tDest=null;
+function salvarDest(){ls.set(chave+'-dest',BIB.dest);clearTimeout(tDest);tDest=setTimeout(()=>{if(col)col.doc('destaques').set({m:BIB.dest}).catch(()=>{})},800)}
+
+
+/* comentários bíblicos por versículo */
+BIB.com=ls.get('pulpito-bcom',true);BIB.modo=ls.get('pulpito-bmodo','res');BIB.cache={};BIB.gerando={};
+const comKey=(l,c)=>BIB.modo==='comp'?`v2-${l}-${c}`:`${l}-${c}`;
+const profKey=(l,c)=>`p-${l}-${c}`;
+async function carregarCache(k){
+ if(BIB.cache[k])return BIB.cache[k];
+ const loc=ls.get('pulpito-com-'+k,null);if(loc){BIB.cache[k]=loc;return loc}
+ if(colCom){const r=await lerDoc(colCom.doc(k));if(r&&r.m){BIB.cache[k]=r.m;ls.set('pulpito-com-'+k,r.m)}}
+ return BIB.cache[k];
+}
+let colCom=null;
+async function lerDoc(ref){try{const s=await ref.get();if(!s)return null;if(typeof s.data==='function')return s.exists===false?null:s.data();return s.data??s}catch(e){return null}}
+function bComHTML(t){const partes=String(t).split(/(?=\[(?:Holman|Thompson|Nelson|Scofield|Shedd|Wiersbe|Spurgeon|Genebra|Fé Reformada|Pentecostal|Plenitude|NTLH|NVI|NAA|NVT|Moody|Manual SBB|MacArthur)\])|(?=Para a prega[cç][aã]o:)|(?=Nas apostilas:)/).map(s=>s.trim()).filter(Boolean);return partes.map(s=>`<p>${esc(s).replace(/^\[([^\]]{2,30})\]\s*/,'<b>$1:</b> ').replace(/^(Para a prega[cç][aã]o:|Nas apostilas:)/,'<b>$1</b>')}</p>`).join('')}
+const CURTOS=['Holman','Thompson','Nelson','Scofield','Shedd','Wiersbe','Spurgeon','Genebra','Fé Reformada','Pentecostal','Plenitude','NTLH','NVI','NAA','NVT','Moody','Manual SBB','MacArthur'];
+const GUIA_FONTES=`COMO APROFUNDAR CADA FONTE (escreva com palavras próprias, na linha característica de cada obra):
+- [Holman] (King James 1611 com estudo Holman): contexto histórico preciso (época, autor, situação), explicação do versículo frase por frase e o sentido de termos do hebraico ou do grego com transliteração (ex.: hesed, "bondade leal"; agápē).
+- [Thompson] (referências em cadeia): o tema-chave do versículo e a cadeia de 3 a 5 referências que o desenvolvem pela Bíblia, em ordem, cada uma com 3 a 6 palavras dizendo o que acrescenta.
+- [Nelson] (Thomas Nelson): pano de fundo cultural, geográfico ou arqueológico — costumes, lugares, objetos, práticas da época — e estudo de palavra.
+- [Scofield]: aliança ou dispensação em vista, tipologia (tipos e figuras de Cristo e da Igreja), profecia e a doutrina que o versículo estabelece.
+- [Shedd]: nota teológica e pastoral — o que o texto ensina sobre Deus, o homem, a salvação e a vida cristã.
+- [Wiersbe]: frase de esboço expositivo, clara e memorável, e aplicação prática para a vida do crente hoje.
+- [Spurgeon]: o calor do pregador — Cristo no centro, ilustração viva, frase de efeito e apelo ao coração.
+- [Genebra] e [Fé Reformada]: a doutrina do texto — soberania de Deus, aliança, graça, justificação — e a ligação com a teologia histórica da Igreja.
+- [Pentecostal]: a obra do Espírito Santo no texto — batismo com o Espírito, dons, poder, santificação e avivamento.
+- [Plenitude]: a verdade em ação — como o texto se vive no Reino, na oração e no louvor.
+- [NTLH], [NVI], [NAA] e [NVT]: o sentido claro do texto em linguagem atual, o contexto histórico e a aplicação prática para o dia a dia.
+- [Moody] (Comentário Bíblico Moody): exegese cuidadosa do versículo — gramática e sentido das palavras no original, ligação com o argumento do livro e com o esboço da passagem.
+- [Manual SBB] (Manual Bíblico SBB): o quadro do livro e da passagem — autor, data, destinatários, propósito, lugar no conjunto da Bíblia — e o fundo histórico, geográfico e cultural.
+- [MacArthur] (Dicionário Bíblico MacArthur): verbete das pessoas, lugares, termos ou doutrinas do versículo — definição precisa, sentido no original e o que a Bíblia ensina sobre eles.`;
+function bPintarCom(l,c){
+ if(BIB.livro!==l||BIB.cap!==c)return;
+ const m=BIB.cache[comKey(l,c)]||{},P2=BIB.cache[profKey(l,c)]||{};
+ $('bTexto').querySelectorAll('[data-com]').forEach(el=>{const n=el.dataset.com,t=m[n],pr=P2[n]||m['p'+n];if(t){el.innerHTML=bComHTML(t)+(pr?`<div class="prof"><p class="ptit">Estudo completo do versículo</p>${bComHTML(pr)}</div>`:`<button type="button" class="aprof" data-aprof="${n}">✦ Aprofundar este versículo em todas as fontes</button>`);el.classList.remove('pend')}else{const g=BIB.gerV[comKey(l,c)+':'+n];el.classList.remove('pend');el.innerHTML=`<button type="button" class="gcom${g?' busy':''}" data-gcom="${n}">${g?'Escrevendo o comentário…':'✦ Comentário '+(BIB.modo==='comp'?'completo':'resumido')}</button>`}});
+}
+function bStatus(l,c,txt,botao){
+ if(BIB.livro!==l||BIB.cap!==c)return;
+ const S=$('bComSt');if(!txt){S.hidden=true;return}
+ S.hidden=false;S.innerHTML=`<span>${esc(txt)}</span>${botao?`<button type="button" id="bComGerar">${esc(botao)}</button>`:''}`;
+}
+async function bComentarios(l,c){
+ await carregarCache(comKey(l,c));await carregarCache(profKey(l,c));
+ bPintarCom(l,c);
+ bStatus(l,c,`Toque em “✦ Comentário ${BIB.modo==='comp'?'completo':'resumido'}” abaixo de cada versículo que quiser estudar. Os comentários são escritos pelo assistente na linha de estudo das fontes — não são as notas impressas; confira no seu exemplar.`);
+}
+BIB.gerV={};
+async function gerarComVerso(l,c,n,btn){
+ const comp=BIB.modo==='comp',k=comKey(l,c),vs=BIB.dados[l][2][c],gk=k+':'+n;
+ if(BIB.gerV[gk])return;BIB.gerV[gk]=true;
+ if(btn){btn.classList.add('busy');btn.textContent=comp?'Escrevendo o comentário completo…':'Escrevendo o comentário…'}
+ try{
+  const lote=[n];
+  const ctxV=`Contexto (não comente, só para entender): ${[n-2,n-1].filter(v=>v>=1).map(v=>`${v} ${bLimpo(vs[v-1])}`).join(' ')} … ${[n+1,n+2].filter(v=>v<=vs.length).map(v=>`${v} ${bLimpo(vs[v-1])}`).join(' ')}`;
+  const acvCap='';
+  const prompt=!comp?`Você escreve comentários bíblicos versículo a versículo para um pregador.\nPassagem: ${BIB.dados[l][1]} ${c+1}:${lote[0]}-${lote[lote.length-1]}.\nTexto (Bíblia Livre):\n${lote.map(v=>`${v} ${bLimpo(vs[v-1])}`).join('\n')}\n\nPara CADA versículo, escreva um comentário resumido de 40 a 80 palavras que integre as linhas de estudo destas fontes:\n${FONTES.map(f=>`- ${f.n}: ${f.f}`).join('\n')}\nEm cada comentário use de 1 a 3 fontes, as mais pertinentes ao versículo, marcando a linha seguida com o nome curto entre colchetes antes da observação, por exemplo: [Thompson] … [Wiersbe] … Nomes curtos: ${CURTOS.join(', ')}. Traga contexto histórico e cultural, sentido de palavras do hebraico ou do grego quando útil, referências cruzadas (só a referência, sem transcrever) e, quando couber, a aplicação profética.\nLinha doutrinária a respeitar: ${doutrina()}\nNão reproduza as notas impressas dessas obras: explique com palavras próprias a linha característica de cada uma. Não invente fatos nem citações. Português do Brasil, texto simples.\nUse como referência SOMENTE as Bíblias de estudo, comentários, manual e dicionário citados acima.\nDevolva SOMENTE um objeto JSON cujas chaves são os números dos versículos (como texto) e os valores são os comentários.${acvCap}`:`Você escreve comentários bíblicos profundos, versículo a versículo, para um pregador que estuda com estas obras: King James 1611 com estudo Holman, Bíblias de Estudo Thompson, Thomas Nelson, Scofield, Shedd, Spurgeon, Genebra, Fé Reformada, Pentecostal, Plenitude, NTLH, NVI, NAA e NVT, o Comentário Bíblico Expositivo de Warren Wiersbe, o Comentário Bíblico Moody, o Manual Bíblico SBB e o Dicionário Bíblico MacArthur.\nPassagem: ${BIB.dados[l][1]} ${c+1}:${lote[0]}-${lote[lote.length-1]} (contexto: ${BIB.dados[l][1]} ${c+1} tem ${vs.length} versículos).\nTexto (Bíblia Livre):\n${lote.map(v=>`${v} ${bLimpo(vs[v-1])}`).join('\n')}\n\nPara CADA versículo escreva um comentário rico em detalhes, de 120 a 200 palavras, com 3 a 4 blocos, cada bloco começando pelo nome curto da fonte entre colchetes. Escolha as fontes que mais iluminam aquele versículo, variando entre os versículos, e sempre inclua pelo menos um bloco com contexto histórico ou do original.\n${GUIA_FONTES}\nLinha doutrinária a respeitar: ${doutrina()}\nCite referências bíblicas só pela referência, sem transcrever. Não reproduza as notas impressas dessas obras. Não invente fatos, datas nem citações; quando houver incerteza histórica, diga "provavelmente". Português do Brasil, texto simples.\nUse como referência SOMENTE as Bíblias de estudo, comentários, manual e dicionário citados acima.\nDevolva SOMENTE um objeto JSON cujas chaves são os números dos versículos (como texto) e os valores são os comentários.${acvCap}`;
+  let r=null;
+  r=await sample.json(ctxV+'\n\n'+prompt,{modelTier:comp?'complex':'default'});
+  const t=r&&typeof r==='object'?(r[n]||r[String(n)]||Object.values(r)[0]):null;
+  if(!t)throw new Error('vazio');
+  BIB.cache[k]=Object.assign(BIB.cache[k]||{},{[n]:String(t)});ls.set('pulpito-com-'+k,BIB.cache[k]);
+  if(colCom)colCom.doc(k).set({m:BIB.cache[k]}).catch(()=>{});
+  bPintarCom(l,c);
+ }catch(e){if(btn&&btn.isConnected){btn.classList.remove('busy');btn.textContent=e&&e.code==='rate_limited'?'Muitos pedidos — tente em instantes':e&&e.code==='not_granted'?'Assistente indisponível':'Não foi possível — tocar para tentar de novo'}}
+ finally{BIB.gerV[gk]=false}
+}
+
+$('bTexto').addEventListener('click',e=>{const b=e.target.closest('[data-gcom]');if(!b)return;e.stopPropagation();gerarComVerso(BIB.livro,BIB.cap,+b.dataset.gcom,b)});
+$('bTexto').addEventListener('click',async e=>{
+ const b=e.target.closest('[data-aprof]');if(!b)return;e.stopPropagation();
+ const {livro:l,cap:c}=BIB,n=+b.dataset.aprof,k=profKey(l,c),vs=BIB.dados[l][2][c];
+ b.classList.add('busy');b.textContent='Estudando o versículo nas fontes…';
+ const ant=vs.slice(Math.max(0,n-3),n-1).map((t,i)=>`${Math.max(1,n-2)+i} ${bLimpo(t)}`).join('\n'),dep=vs.slice(n,n+2).map((t,i)=>`${n+1+i} ${bLimpo(t)}`).join('\n');
+ try{
+  const r=await sample(`Faça um estudo completo e profundo de ${BIB.dados[l][1]} ${c+1}:${n} para um pregador, passando pelas fontes, um bloco para cada, nesta ordem: ${CURTOS.map(x=>'['+x+']').join(', ')}. Cada bloco com 40 a 80 palavras; as Bíblias de tradução moderna (NTLH, NVI, NAA, NVT) podem vir num bloco mais curto cada.\n\nVersículo (Bíblia Livre): ${n} ${bLimpo(vs[n-1])}\nContexto anterior:\n${ant||'(início do capítulo)'}\nContexto seguinte:\n${dep||'(fim do capítulo)'}\n\n${GUIA_FONTES}\nDepois dos blocos, termine com uma linha começando por "Para a pregação:" com uma frase de aplicação profética para a Igreja nesta última hora.\nLinha doutrinária a respeitar: ${doutrina()}\nCite referências só pela referência. Não reproduza as notas impressas dessas obras; escreva com palavras próprias na linha de cada uma. Não invente fatos nem citações. Texto simples, sem markdown, cada bloco começando pelo nome da fonte entre colchetes.\nUse como referência SOMENTE as Bíblias de estudo, comentários, manual e dicionário citados.`,{modelTier:'complex'});
+  const t=(r&&r.text||'').trim();if(!t)throw new Error('vazio');
+  BIB.cache[k]=Object.assign(BIB.cache[k]||{},{[n]:t});ls.set('pulpito-com-'+k,BIB.cache[k]);if(colCom)colCom.doc(k).set({m:BIB.cache[k]}).catch(()=>{});
+  bPintarCom(l,c);
+ }catch(err){b.classList.remove('busy');b.textContent=err&&err.code==='rate_limited'?'Muitos pedidos — tente em instantes':'Não foi possível — tocar para tentar de novo'}
+});
+
+function bSegPintar(){const at=BIB.com?BIB.modo:'off';$('bComTog').querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===at))}
+bSegPintar();
+$('bComTog').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;const v=b.dataset.m;BIB.com=v!=='off';if(BIB.com)BIB.modo=v;ls.set('pulpito-bcom',BIB.com);ls.set('pulpito-bmodo',BIB.modo);bSegPintar();if(BIB.dados)bIr(BIB.livro,BIB.cap)});
+
+
+/* encontrar passagem pelo contexto */
+$('bCtxF').addEventListener('submit',async e=>{
+ e.preventDefault();const desc=$('bCtxTxt').value.trim(),R=$('bCtxRes'),btn=$('bCtxBtn');
+ if(desc.length<6){toast('Descreva um pouco mais a passagem');return}
+ if(!sample){toast('O assistente não está disponível nesta visualização');return}
+ await bCarregar();btn.classList.add('busy');btn.textContent='Procurando…';R.innerHTML='';
+ try{
+  const r=await sample.json(`Um pregador descreve uma passagem bíblica de que se lembra, mas não sabe a referência:\n"${desc}"\n\nIdentifique a(s) passagem(ns) da Bíblia que correspondem a essa descrição, da mais provável para a menos provável (no máximo 5). Inclua passagens paralelas quando existirem (por exemplo, o mesmo episódio em outro Evangelho).\nDevolva SOMENTE um objeto JSON: {"passagens":[{"ref":"Livro capítulo:versículo-versículo","titulo":"título curto do episódio","motivo":"uma frase explicando por que corresponde"}]}. Use nomes de livros em português (ex.: Mateus, 1 Reis, Apocalipse). Se nada corresponder, devolva {"passagens":[]}.`,{modelTier:'default'});
+  const lista=(r&&Array.isArray(r.passagens)?r.passagens:[]).map(x=>({...x,p:bParse(String(x.ref||''))})).filter(x=>x.p&&BIB.dados[x.p.l][2][x.p.c]);
+  if(!lista.length){R.innerHTML='<p class="note" style="margin-top:10px">Não encontrei uma passagem correspondente. Tente descrever com outras palavras, com personagens, lugar ou o que aconteceu.</p>';return}
+  R.innerHTML=lista.map((x,i)=>{const {l,c,v,v2}=x.p,vs=BIB.dados[l][2][c],a=v||1,b=Math.min(v2||v||Math.min(3,vs.length),vs.length);
+   let prev=vs.slice(a-1,b).map((t,k)=>`${a+k} ${bLimpo(t)}`).join(' ');if(prev.length>320)prev=prev.slice(0,320).replace(/\s\S*$/,'')+'…';
+   const ref=`${BIB.dados[l][1]} ${c+1}${v?':'+v+(v2?'-'+v2:''):''}`;
+   return `<div class="cand"><h4>${i+1}. ${esc(ref)}</h4>${x.titulo?`<p class="tt">${esc(x.titulo)}</p>`:''}${x.motivo?`<p class="mot">${esc(x.motivo)}</p>`:''}<blockquote>${esc(prev)}</blockquote><button type="button" class="pri" data-ir-l="${l}" data-ir-c="${c}" data-ir-v="${v||''}" data-ir-v2="${v2||''}">Ir para o texto bíblico →</button></div>`}).join('');
+ }catch(err){R.innerHTML=`<p class="note" style="margin-top:10px">${err&&err.code==='rate_limited'?'Muitos pedidos agora. Aguarde um pouco e tente de novo.':'Não foi possível identificar agora. Tente de novo.'}</p>`}
+ finally{btn.classList.remove('busy');btn.textContent='Identificar passagem'}
+});
+$('bCtxRes').addEventListener('click',e=>{const b=e.target.closest('[data-ir-l]');if(!b)return;$('bResultados').hidden=true;bIr(+b.dataset.irL,+b.dataset.irC,+b.dataset.irV||null,+b.dataset.irV2||null)});
+
+/* busca textual */
+const CORES={am:'#f3d36b',vd:'#9fd6a3',az:'#9cc6f0',rs:'#f2a7c3'};
+function bIndiceNorm(){if(!BIB.norm)BIB.norm=BIB.dados.map(b=>b[2].map(c=>c.map(t=>norm(bLimpo(t)))));return BIB.norm}
+function bMarcar(t,termos){let s=esc(bLimpo(t));const n=norm(bLimpo(t));const pos=[];termos.forEach(q=>{let i=n.indexOf(q);while(i>=0){pos.push([i,i+q.length]);i=n.indexOf(q,i+q.length)}});if(!pos.length)return s;pos.sort((a,b)=>a[0]-b[0]);const raw=bLimpo(t);let out='',k=0;for(const [a,b] of pos){if(a<k)continue;out+=esc(raw.slice(k,a))+'<mark>'+esc(raw.slice(a,b))+'</mark>';k=b}return out+esc(raw.slice(k))}
+let bAchados=[],bMostrar=100;
+function bRenderRes(titulo,lista,termos){
+ const R=$('bResultados');R.hidden=false;
+ R.innerHTML=`<h3><span>${esc(titulo)}</span><button type="button" id="bFechar">Fechar</button></h3>${lista.length?lista.slice(0,bMostrar).map(([l,c,v,cor])=>`<button class="res" data-l="${l}" data-c="${c}" data-v="${v}"><b>${cor?`<span class="dot" style="background:${CORES[cor]}"></span>`:''}${esc(BIB.dados[l][1])} ${c+1}:${v}</b>${bMarcar(BIB.dados[l][2][c][v-1],termos)}</button>`).join('')+(lista.length>bMostrar?`<button type="button" id="bMaisRes" style="margin-top:10px">Mostrar mais (${lista.length-bMostrar} restantes)</button>`:''):'<p class="note">Nenhum versículo encontrado.</p>'}`;
+}
+$('bBuscaF').addEventListener('submit',async e=>{
+ e.preventDefault();await bCarregar();
+ const q=norm($('bBusca').value.trim().replace(/[“”"]/g,''));if(q.length<2){toast('Digite ao menos 2 letras');return}
+ const frase=/^["“].*["”]$/.test($('bBusca').value.trim());
+ const termos=frase?[q]:q.split(/\s+/).filter(Boolean);
+ const N=bIndiceNorm(),esc2=$('bEscopo').value;let ini=0,fim=66;
+ if(esc2==='at')fim=39;else if(esc2==='nt')ini=39;else if(esc2==='livro'){ini=BIB.livro;fim=BIB.livro+1}
+ bAchados=[];
+ for(let l=ini;l<fim;l++)N[l].forEach((cap,c)=>cap.forEach((t,i)=>{if(termos.every(x=>t.includes(x)))bAchados.push([l,c,i+1])}));
+ bMostrar=100;bRenderRes(`${bAchados.length.toLocaleString('pt-BR')} ${bAchados.length===1?'versículo':'versículos'} com “${$('bBusca').value.trim()}”`,bAchados,termos);
+ bRenderRes.termos=termos;bRenderRes.titulo=$('bResultados').querySelector('h3 span').textContent;
+});
+$('bResultados').addEventListener('click',e=>{
+ if(e.target.id==='bFechar'){$('bResultados').hidden=true;return}
+ if(e.target.id==='bMaisRes'){bMostrar+=100;bRenderRes(bRenderRes.titulo,bAchados,bRenderRes.termos||[]);return}
+ const r=e.target.closest('.res');if(r)bIr(+r.dataset.l,+r.dataset.c,+r.dataset.v);
+});
+$('bVerDest').onclick=async()=>{
+ await bCarregar();
+ bAchados=Object.entries(BIB.dest).map(([id,cor])=>{const [l,c,v]=id.split('.').map(Number);return [l,c,v,cor]}).filter(x=>BIB.dados[x[0]]&&BIB.dados[x[0]][2][x[1]]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]);
+ bMostrar=100;bRenderRes.termos=[];bRenderRes.titulo=`Meus destaques · ${bAchados.length}`;bRenderRes(bRenderRes.titulo,bAchados,[]);
+};
+
+/* ---------- cópia de segurança ---------- */
+$('bkBaixar').onclick=async()=>{
+ const P=$('bkProg');if(!downloads){P.textContent='Para baixar o arquivo, abra o Púlpito pelo app ou site do Claude.';return}
+ try{const dados={app:'pulpito',versao:1,em:new Date().toISOString(),perfil,mensagens:msgs,destaques:BIB.dest||{}};
+  const r=await downloads.save({filename:`pulpito-copia-${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(dados)});
+  if(r&&r.status==='saved')P.textContent=`Cópia com ${msgs.length} ${msgs.length===1?'mensagem':'mensagens'} pronta. Guarde o arquivo em local seguro.`;
+ }catch(e){P.textContent=e&&e.code==='declined'?'':'Não foi possível gerar a cópia agora.'}
+};
+$('bkArq').onchange=async e=>{
+ const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;const P=$('bkProg');
+ try{const d=JSON.parse(await f.text());if(!d||d.app!=='pulpito'||!Array.isArray(d.mensagens))throw 0;
+  let novas=0,atual2=0;
+  for(const m of d.mensagens){if(!m||!m.id)continue;const ex=msgs.find(x=>x.id===m.id);
+   if(!ex){msgs.push(m);novas++;await salvar(m)}else if((m.atualizado||0)>(ex.atualizado||0)){Object.assign(ex,m);atual2++;await salvar(ex)}}
+  if(d.perfil&&!perfil.nome){perfil=d.perfil;ls.set(chave+'-perfil',perfil);if(col)col.doc('perfil').set(limpo(perfil)).catch(()=>{});renderMe()}
+  if(d.destaques){BIB.dest=Object.assign({},d.destaques,BIB.dest||{});salvarDest()}
+  ls.set(chave,msgs);renderLista();P.textContent=`Restaurado: ${novas} ${novas===1?'mensagem nova':'mensagens novas'}${atual2?` e ${atual2} atualizada${atual2>1?'s':''}`:''}.`;toast('Cópia restaurada');
+ }catch(err){P.textContent='Arquivo inválido. Escolha uma cópia de segurança do Púlpito (.json).'}
+};
+/* ---------- uso sem internet ---------- */
+function pacoteOffline(lista,biblia){
+ const E=esc,P2=t=>String(t||'').split(/\n+/).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${E(s)}</p>`).join('');
+ const sec=(t,x)=>x&&x.trim()?`<h3>${t}</h3>${P2(x)}`:'';
+ const ord=lista.slice().sort((a,b)=>(a.titulo||'').localeCompare(b.titulo||'','pt'));
+ const msgsH=ord.map(m=>{const tp=linhas(m.topicos);const PG=(m.pregacoes||[]).slice().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  return `<article class="msg" id="m-${E(m.id)}"><p class="serie">${E(m.serie||'')}</p><h2>${E(m.titulo||'Sem título')}</h2><p class="ref">${E(m.texto||'')}</p><p class="info">${E([autorLinha(),m.tipo,dataBR(m.data),m.status].filter(Boolean).join(' · '))}</p>
+  <nav class="pt"><a href="#m-${E(m.id)}-1">1 · Tópicos</a><a href="#m-${E(m.id)}-2">2 · Resumida</a><a href="#m-${E(m.id)}-3">3 · Completa</a><a href="#indice">Índice</a></nav>
+  <h2 class="parte" id="m-${E(m.id)}-1"><small>Parte 1</small>Tópicos da mensagem</h2>${tp.length?`<ul>${tp.map(t=>`<li>${E(t)}</li>`).join('')}</ul>`:'<p class="vz">Sem tópicos.</p>'}
+  <h2 class="parte" id="m-${E(m.id)}-2"><small>Parte 2</small>Mensagem resumida</h2>${m.resumida?P2(m.resumida):'<p class="vz">Sem versão resumida.</p>'}
+  <h2 class="parte" id="m-${E(m.id)}-3"><small>Parte 3</small>Mensagem completa</h2>
+  ${m.leituraBib?`<h3>Leitura bíblica</h3><div class="bib">${P2(m.leituraBib)}</div>`:''}${comRelato(m)?sec('O relato',m.relato):''}${m.tema?`<blockquote>${E(m.tema)}</blockquote>`:''}${sec('Introdução',m.intro)}${(m.pontos||[]).filter(p=>p.titulo||p.texto).map((p,i)=>`<h3>${i+1}. ${E(p.titulo)}</h3>${P2(p.texto)}`).join('')}${sec('Ilustrações',m.ilustracoes)}${sec('Aplicação',m.aplicacao)}${sec('Aplicação profética',m.profetica)}${sec('Conclusão e apelo',m.conclusao)}
+  ${PG.length?`<h3>Onde foi pregada</h3><ul>${PG.map(e=>`<li>${E([dataBR(e.data),e.igreja,e.cidade,e.ocasiao].filter(Boolean).join(' · '))}</li>`).join('')}</ul>`:''}
+  <p class="topo"><a href="#indice">↑ Voltar ao índice</a></p></article>`}).join('');
+ let bibH='',bibIdx='';
+ if(biblia){const L=BIB.dados;
+  bibIdx=`<section id="biblia"><h2>Bíblia Sagrada</h2><p class="info">Bíblia Livre (BLIVRE), Almeida 1819 revisada — CC BY 4.0</p><div class="livros">${L.map((b,i)=>`<a href="#b${i}">${E(b[1])}</a>`).join('')}</div></section>`;
+  bibH=L.map((b,i)=>`<section class="livro" id="b${i}"><h2>${E(b[1])}</h2><p class="caps">${b[2].map((_,c)=>`<a href="#b${i}-${c+1}">${c+1}</a>`).join('')}</p>${b[2].map((vs,c)=>`<h3 id="b${i}-${c+1}">${E(b[1])} ${c+1} <a class="mini" href="#b${i}">capítulos</a> <a class="mini" href="#biblia">livros</a></h3><p class="vv">${vs.map((t,v)=>`<sup>${v+1}</sup>${E(t).replace(/\[([^\]]*)\]/g,'<i>$1</i>')} `).join('')}</p>`).join('')}</section>`).join('')}
+ const css=`body{margin:0;background:#f6f2ef;color:#21171a;font:18px/1.7 Georgia,'Times New Roman',serif}main{max-width:760px;margin:0 auto;padding:16px}header{background:#4a1626;color:#fff;padding:22px 18px;border-radius:0 0 22px 22px}header h1{margin:0;font-size:30px}header p{margin:4px 0 0;color:#e7cfd5;font:14px system-ui,sans-serif}h2{color:#4a1626;line-height:1.15}h3{color:#4a1626;margin:26px 0 8px}p{text-align:justify;hyphens:auto}.msg,section{background:#fff;border-radius:18px;padding:18px;margin:16px 0;box-shadow:0 8px 24px -18px #2e0c17}.serie{color:#a8873a;font:600 14px system-ui,sans-serif;margin:0}.ref{font-style:italic;margin:0}.info{color:#6e6064;font:14px system-ui,sans-serif}.pt,.livros,.caps{display:flex;flex-wrap:wrap;gap:6px}.pt a,.livros a,.caps a{font:600 14px system-ui,sans-serif;color:#4a1626;background:#f6e9ec;border-radius:99px;padding:6px 12px;text-decoration:none}.caps a{min-width:28px;text-align:center}.parte{border-top:2px solid #c9a24a;padding-top:14px;margin-top:28px}.parte small{display:block;color:#a8873a;font:600 13px system-ui,sans-serif}blockquote{border-left:4px solid #c9a24a;margin:16px 0;padding:4px 0 4px 14px;font-style:italic}.bib{border-left:4px solid #4a1626;padding-left:14px;font-style:italic}.vz{color:#6e6064}.topo a,.mini{font:13px system-ui,sans-serif;color:#a8873a}#indice ol{padding-left:1.4em}#indice li{margin:6px 0}#indice a{color:#21171a;text-decoration:none}#indice small{display:block;color:#6e6064;font:13px system-ui,sans-serif}#busca{width:100%;box-sizing:border-box;font-size:17px;padding:12px;border:1px solid #ddd;border-radius:12px;margin:8px 0}sup{color:#4a1626;font:600 11px system-ui,sans-serif;margin:0 3px 0 6px}@media(prefers-color-scheme:dark){body{background:#120e0d;color:#efe6e2}.msg,section{background:#1c1615}h2,h3,.pt a,.livros a,.caps a,sup{color:#d9a3b2}.pt a,.livros a,.caps a{background:#2c1a1e}#indice a{color:#efe6e2}}`;
+ const idx=`<section id="indice"><h2>Minhas mensagens (${ord.length})</h2><input id="busca" type="search" placeholder="Buscar título, passagem ou série…"><ol>${ord.map(m=>`<li data-q="${E(norm([m.titulo,m.texto,m.serie].join(' ')))}"><a href="#m-${E(m.id)}"><b>${E(m.titulo||'Sem título')}</b><small>${E([m.texto,m.serie,m.status].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ol>${biblia?'<p><a href="#biblia">Ir para a Bíblia →</a></p>':''}</section>`;
+ const js=`<script>document.getElementById('busca').addEventListener('input',function(){var q=this.value.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();document.querySelectorAll('#indice li').forEach(function(li){li.style.display=!q||li.dataset.q.indexOf(q)>=0?'':'none'})})<\/script>`;
+ return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Púlpito offline</title><style>${css}</style></head><body><header><h1>Púlpito · offline</h1><p>${E(autorLinha()||'Minhas mensagens')} · gerado em ${new Date().toLocaleDateString('pt-BR')} · funciona sem internet</p></header><main>${idx}${msgsH}${bibIdx}${bibH}</main>${js}</body></html>`;
+}
+$('offGerar').onclick=async e=>{
+ const b=e.currentTarget,P=$('offProg');
+ if(!downloads){P.textContent='Para baixar o arquivo, abra o Púlpito pelo app ou site do Claude.';return}
+ b.classList.add('busy');P.textContent='Preparando o pacote…';
+ try{
+  const comB=$('offBib').checked;if(comB){P.textContent='Preparando a Bíblia…';await bCarregar()}
+  const html=pacoteOffline(msgs.filter(m=>m.titulo||m.texto),comB);
+  const r=await downloads.save({filename:'pulpito-offline.html',data:new Blob([html],{type:'text/html'})});
+  P.textContent=r&&r.status==='saved'?'Pronto. Guarde o arquivo e abra-o quando estiver sem internet.':'';
+ }catch(err){P.textContent=err&&err.code==='declined'?'':'Não foi possível gerar o pacote agora.'}
+ finally{b.classList.remove('busy')}
+};
+
+async function sincronizarPendentes(){
+ if(!col||navigator.onLine===false||!pend.size)return;
+ let n=0;for(const id of [...pend]){const m=msgs.find(x=>x.id===id);try{if(m)await col.doc(id).set(limpo(m));else await col.doc(id).delete();pend.delete(id);n++}catch(e){}}
+ pendSalvar();if(n)toast(`${n} ${n>1?'alterações sincronizadas':'alteração sincronizada'} com a sua conta`);
+}
+function estadoRede(){const off=navigator.onLine===false;$('offbar').hidden=!off;document.body.classList.toggle('offline',off);if(!off)sincronizarPendentes()}
+addEventListener('online',estadoRede);addEventListener('offline',estadoRede);
+/* ---------- carga ---------- */
+msgs=ls.get(chave,[]);perfil=ls.get(chave+'-perfil',{});BIB.dest=ls.get(chave+'-dest',{});
+setModulo('dev');vista('dev');renderMe();estadoRede();$('sync').textContent='Salvo neste aparelho';
+(async()=>{
+ try{
+  const [d,u,s,dl]=await Promise.all([claude.use('db'),claude.use('user'),claude.use('sample'),claude.use('downloads')]);
+  sample=s;downloads=dl;if(!s){document.querySelectorAll('.ai').forEach(b=>b.hidden=true);$('bComTog').hidden=true;$('bCtx').hidden=true}else if(BIB.dados&&viewAtual==='biblia')bIr(BIB.livro,BIB.cap);
+  if(u){const me=await u.me();conta={name:me.name||'',avatarUrl:me.avatarUrl||''};souDono=!!me.isOwner;renderMe()}
+  if(d){try{const c=await lerDoc(d.doc('config/app'));if(c)CFG=c;
+   else if(souDono){const antiga=ls.get(chave+'-perfil',{}).doutrina||perfil.doutrina;if(antiga&&antiga.trim()&&antiga.trim()!==DOUTRINA_PADRAO.trim()){CFG={doutrina:antiga.trim(),em:Date.now()};d.doc('config/app').set(limpo(CFG)).catch(()=>{})}}}catch(e){}}
+  if(d&&u){const id=await u.id();if(id){
+   /* separa os dados deste usuário neste aparelho */
+   const antiga=msgs,antigoPerfil=perfil;chave='pulpito-'+id;
+   msgs=ls.get(chave,null)??(ls.get('pulpito-dono',null)?[]:(ls.set('pulpito-dono',id),antiga));
+   perfil=ls.get(chave+'-perfil',null)??(ls.get('pulpito-dono')===id?antigoPerfil:{});
+   col=d.collection('data/users/'+id);pubDb=d;meuId=id;lerDoc(d.doc('publicas/'+id)).then(x=>{if(!pubIdxOk){pubIdx=(x&&x.idx)||{};pubIdxOk=true}});colCom=d.collection('data/users/'+id+'/biblia/comentarios');
+   let podeGravar=true;try{await col.doc('_teste').set({t:Date.now()});col.doc('_teste').delete().catch(()=>{})}catch(e){podeGravar=false}
+   if(!podeGravar){soLocal=true;col=null;colCom=null;
+    const mm=ls.get(chave,null);if(mm)msgs=mm;const pp=ls.get(chave+'-perfil',null);if(pp)perfil=pp;
+    $('sync').textContent='Salvo neste aparelho';renderMe();renderLista();
+    if(!ls.get('pulpito-aviso-local',false)){ls.set('pulpito-aviso-local',true);setTimeout(()=>toast('Seu acesso não salva na nuvem: suas mensagens ficam guardadas neste aparelho. Faça cópias de segurança no Perfil.'),1200)}
+    if(!perfil.nome&&viewAtual==='dev'){carregarPerfil();vista('perfil')}
+    throw 'local';}
+   const snap=await col.get();
+   const rem=(snap.docs||snap||[]).map(x=>({id:x.id,...(typeof x.data==='function'?x.data():(x.data||x))}));
+   const p=rem.find(r=>r.id==='perfil');if(p){const {id:_x,...pp}=p;perfil=pp}else if(perfil.nome)col.doc('perfil').set(limpo(perfil)).catch(()=>{});
+   const ds=rem.find(r=>r.id==='destaques');BIB.dest=Object.assign(ls.get(chave+'-dest',{}),ds&&ds.m||{});ls.set(chave+'-dest',BIB.dest);
+   const mapa=new Map(rem.filter(r=>r.id&&r.id!=='perfil'&&r.id!=='destaques'&&(r.titulo!==undefined||r.texto!==undefined||r.pontos)).map(r=>[r.id,r]));
+   msgs=msgs.filter(l=>l&&l.id&&!('nome' in l&&!('titulo' in l)));
+   for(const l of msgs){const r=mapa.get(l.id);if(!r||(l.atualizado||0)>(r.atualizado||0)){mapa.set(l.id,l);col.doc(l.id).set(limpo(l)).catch(()=>{})}}
+   msgs=[...mapa.values()];ls.set(chave,msgs);ls.set(chave+'-perfil',perfil);
+   $('sync').textContent='Sincronizado na sua conta';sincronizarPendentes();estadoRede();
+   renderMe();renderLista();
+   if(!perfil.nome&&viewAtual==='dev'){carregarPerfil();vista('perfil')}
+  }}
+ }catch(e){$('sync').textContent='Salvo neste aparelho'}
+})();
+}
+</script>
+</body>
+</html>

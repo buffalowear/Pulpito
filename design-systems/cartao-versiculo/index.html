@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cartão de versículo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&family=Instrument+Serif&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&family=Space+Grotesk:wght@500&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<div class="fundo-app">
+  <main class="folha">
+
+    <article class="cartao" id="cartao" data-estilo="margem" data-fonte="serif" aria-label="Prévia do cartão">
+      <div class="margem" aria-hidden="true">
+        <span class="t3 margem-rotulo"><span id="mLivro">PROVÉRBIOS</span> · <span id="mCap">4</span></span>
+        <span class="margem-fio"></span>
+        <span class="t3 margem-num" id="mVers">1</span>
+      </div>
+      <header class="cartao-topo">
+        <span class="t3 topo-a"></span>
+        <span class="t3 topo-b"></span>
+      </header>
+      <div class="cartao-meio">
+        <span class="forma" aria-hidden="true"></span>
+        <p class="h1" id="verso">Ouvi, filhos, a correção do pai; e prestai atenção, para que conheçais o entendimento.</p>
+      </div>
+      <footer class="cartao-pe">
+        <span class="pe-fio" aria-hidden="true"></span>
+        <span class="t3 pe-a"></span>
+        <span class="t3 pe-b"></span>
+        <span class="t3 pe-c"></span>
+      </footer>
+    </article>
+
+    <section class="seletor-estilo" aria-label="Estilo do cartão">
+      <button type="button" class="btn2" id="anterior" aria-label="Estilo anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg>
+      </button>
+      <div class="seletor-texto">
+        <span class="t3" id="estiloNum">ESTILO 5 / 6</span>
+        <h2 class="h2" id="estiloNome">Margem</h2>
+      </div>
+      <button type="button" class="btn2" id="proximo" aria-label="Próximo estilo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6.5 15 12l-5.5 5.5"/></svg>
+      </button>
+    </section>
+
+    <section class="grupo grupo-cor" aria-label="Cor">
+      <div class="grupo-topo"><span class="t3">COR</span><span class="t1" id="corNome">Marfim</span></div>
+      <div class="fila" id="cores" role="radiogroup" aria-label="Cor do cartão">
+        <button type="button" class="btn3 cor-claro" role="radio" aria-checked="false" data-cor="claro" data-nome="Claro" aria-label="Claro"></button>
+        <button type="button" class="btn3 cor-grafite" role="radio" aria-checked="false" data-cor="grafite" data-nome="Grafite" aria-label="Grafite"></button>
+        <button type="button" class="btn3 cor-areia" role="radio" aria-checked="false" data-cor="areia" data-nome="Areia" aria-label="Areia"></button>
+        <button type="button" class="btn3 cor-breu" role="radio" aria-checked="false" data-cor="breu" data-nome="Breu" aria-label="Breu"></button>
+        <button type="button" class="btn3 cor-salvia" role="radio" aria-checked="false" data-cor="salvia" data-nome="Sálvia" aria-label="Sálvia"></button>
+        <button type="button" class="btn3 cor-caramelo" role="radio" aria-checked="false" data-cor="caramelo" data-nome="Caramelo" aria-label="Caramelo"></button>
+        <button type="button" class="btn3 cor-azul" role="radio" aria-checked="false" data-cor="azul" data-nome="Azul" aria-label="Azul"></button>
+        <button type="button" class="btn3 cor-roxo" role="radio" aria-checked="false" data-cor="roxo" data-nome="Roxo" aria-label="Roxo"></button>
+        <button type="button" class="btn3 cor-marfim" role="radio" aria-checked="true" data-cor="marfim" data-nome="Marfim" aria-label="Marfim"></button>
+        <button type="button" class="btn3 cor-rosa" role="radio" aria-checked="false" data-cor="rosa" data-nome="Rosa" aria-label="Rosa"></button>
+      </div>
+    </section>
+
+    <section class="grupo grupo-fonte" aria-label="Fonte">
+      <div class="grupo-topo"><span class="t3">FONTE</span><span class="t1" id="fonteNome">Serif</span></div>
+      <div class="fila" id="fontes" role="radiogroup" aria-label="Fonte do cartão">
+        <button type="button" class="btn4 f-sans" role="radio" aria-checked="false" data-fonte="sans" data-nome="Sans" aria-label="Sans">Aa</button>
+        <button type="button" class="btn4 f-serif" role="radio" aria-checked="true" data-fonte="serif" data-nome="Serif" aria-label="Serif">Aa</button>
+        <button type="button" class="btn4 f-condensada" role="radio" aria-checked="false" data-fonte="condensada" data-nome="Condensada" aria-label="Condensada">Aa</button>
+        <button type="button" class="btn4 f-estudio" role="radio" aria-checked="false" data-fonte="estudio" data-nome="Estúdio" aria-label="Estúdio">Aa</button>
+      </div>
+    </section>
+
+    <section class="acoes">
+      <button type="button" class="btn5" id="copiar">COPIAR TEXTO</button>
+      <button type="button" class="btn" id="salvar">SALVAR IMAGEM</button>
+    </section>
+    <p class="aviso" id="aviso" role="status" hidden></p>
+
+  </main>
+</div>
+</body>
+</html>

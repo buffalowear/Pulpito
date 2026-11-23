@@ -1,0 +1,32 @@
+import type { Metadata, Viewport } from 'next';
+import { Archivo, Frank_Ruhl_Libre, Instrument_Serif, Merriweather, Newsreader, Space_Mono } from 'next/font/google';
+import './globals.css';
+import './cartao.css';
+
+const corpo = Merriweather({ variable: '--font-corpo', subsets: ['latin'], weight: ['400', '700', '900'], style: ['normal', 'italic'], display: 'swap' });
+const titulo = Instrument_Serif({ variable: '--font-titulo', subsets: ['latin'], weight: '400', display: 'swap' });
+const rotulo = Space_Mono({ variable: '--font-rotulo', subsets: ['latin'], weight: ['400', '700'], display: 'swap' });
+const cartaoSerif = Newsreader({ variable: '--font-cartao-serif', subsets: ['latin'], weight: ['500', '700'], style: ['normal', 'italic'], display: 'swap' });
+const cartaoSans = Archivo({ variable: '--font-cartao-sans', subsets: ['latin'], weight: ['800'], display: 'swap' });
+const hebraico = Frank_Ruhl_Libre({ variable: '--font-hebraico', subsets: ['hebrew'], weight: ['400', '500'], display: 'swap' });
+
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+export const metadata: Metadata = {
+  title: 'Púlpito',
+  description: 'Bíblia, anotações e mensagens.',
+  applicationName: 'Púlpito',
+  manifest: `${BASE}/manifest.webmanifest`,
+  appleWebApp: { capable: true, title: 'Púlpito', statusBarStyle: 'default' },
+  icons: { icon: `${BASE}/icone-192.png`, apple: `${BASE}/icone-180.png` },
+};
+
+export const viewport: Viewport = { themeColor: '#fcf2d9', width: 'device-width', initialScale: 1, viewportFit: 'cover' };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="pt-BR" className={`${corpo.variable} ${titulo.variable} ${rotulo.variable} ${cartaoSerif.variable} ${cartaoSans.variable} ${hebraico.variable}`}>
+      <body>{children}</body>
+    </html>
+  );
+}
