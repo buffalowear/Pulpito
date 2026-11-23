@@ -81,6 +81,7 @@ export function Biblia({ alvo }: { alvo: number[] }) {
   if (biblia === 'erro') return <p className="p-10 text-center text-mute">Não foi possível carregar esta Bíblia. Abra o app uma vez com internet para guardá-la no aparelho.</p>;
   if (!Array.isArray(biblia) || !Array.isArray(pt)) return <Carregando texto="Abrindo a Bíblia…" />;
   if (!cap) return <Carregando texto="Abrindo…" />;
+  const semTexto = cap.length === 0;
 
   const nomeLivro = LIVROS[pos.l];
   const secoes = new Map((titulos[pos.l]?.[pos.c + 1] || []).map(([v, t]) => [v, t]));
@@ -147,6 +148,7 @@ export function Biblia({ alvo }: { alvo: number[] }) {
         </button>
         <div className="ornamento" aria-hidden="true" />
 
+        {semTexto ? <p className="aviso mt-8">Este capítulo ainda não foi traduzido nesta versão. Escolha outra Bíblia no botão do topo.</p> : null}
         <article className="leitura-biblia mt-8" style={{ fontSize: tam }}>
           {cap.map((t, i) => {
             const v = i + 1, chave = `${pos.l}.${pos.c}.${v}`, cor = dados.destaques[chave];

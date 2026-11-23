@@ -15,6 +15,10 @@ export type Versao = {
 export const VERSOES: Versao[] = [
   { id: 'blivre', sigla: 'BLIVRE', nome: 'Bíblia Livre (base Almeida)', idioma: 'pt', arquivo: 'biblia.json',
     credito: 'Bíblia Livre (BLIVRE) © 2018 Diego Santos, Mario Sérgio e Marco Teles — licença Creative Commons Atribuição 4.0 Brasil.' },
+  { id: 'kjc', sigla: 'KJ-C', nome: 'King James em português — clássica', idioma: 'pt', arquivo: 'dados/kjc.json',
+    credito: 'Tradução própria do Púlpito a partir da King James Version (1769, domínio público). Tradução automática, ainda sem revisão: confira com a sua Bíblia.' },
+  { id: 'kja', sigla: 'KJ-A', nome: 'King James em português — atual', idioma: 'pt', arquivo: 'dados/kja.json',
+    credito: 'Tradução própria do Púlpito a partir da King James Version (1769, domínio público), em linguagem atual. Tradução automática, ainda sem revisão: confira com a sua Bíblia.' },
   { id: 'kjv', sigla: 'KJV', nome: 'King James (inglês)', idioma: 'en', arquivo: 'dados/kjv.json',
     credito: 'King James Version (1769) — domínio público.' },
   { id: 'wlc', sigla: 'HEB', nome: 'Hebraico (Antigo Testamento)', idioma: 'he', arquivo: 'dados/wlc.json', livros: [0, 38],

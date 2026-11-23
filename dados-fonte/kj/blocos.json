@@ -1,0 +1,182 @@
+[
+ {
+  "n": 1,
+  "caps": 35,
+  "vers": 1041,
+  "faixas": "livro 0 (Gênesis) capítulos 1 a 35"
+ },
+ {
+  "n": 2,
+  "caps": 35,
+  "vers": 1037,
+  "faixas": "livro 0 (Gênesis) capítulos 36 a 50; livro 1 (Êxodo) capítulos 1 a 20"
+ },
+ {
+  "n": 3,
+  "caps": 34,
+  "vers": 1091,
+  "faixas": "livro 1 (Êxodo) capítulos 21 a 40; livro 2 (Levítico) capítulos 1 a 14"
+ },
+ {
+  "n": 4,
+  "caps": 29,
+  "vers": 1076,
+  "faixas": "livro 2 (Levítico) capítulos 15 a 27; livro 3 (Números) capítulos 1 a 16"
+ },
+ {
+  "n": 5,
+  "caps": 33,
+  "vers": 1046,
+  "faixas": "livro 3 (Números) capítulos 17 a 36; livro 4 (Deuteronômio) capítulos 1 a 13"
+ },
+ {
+  "n": 6,
+  "caps": 40,
+  "vers": 1082,
+  "faixas": "livro 4 (Deuteronômio) capítulos 14 a 34; livro 5 (Josué) capítulos 1 a 19"
+ },
+ {
+  "n": 7,
+  "caps": 39,
+  "vers": 1046,
+  "faixas": "livro 5 (Josué) capítulos 20 a 24; livro 6 (Juízes) capítulos 1 a 21; livro 7 (Rute) capítulos 1 a 4; livro 8 (1 Samuel) capítulos 1 a 9"
+ },
+ {
+  "n": 8,
+  "caps": 39,
+  "vers": 1060,
+  "faixas": "livro 8 (1 Samuel) capítulos 10 a 31; livro 9 (2 Samuel) capítulos 1 a 17"
+ },
+ {
+  "n": 9,
+  "caps": 29,
+  "vers": 1055,
+  "faixas": "livro 9 (2 Samuel) capítulos 18 a 24; livro 10 (1 Reis) capítulos 1 a 22"
+ },
+ {
+  "n": 10,
+  "caps": 32,
+  "vers": 1042,
+  "faixas": "livro 11 (2 Reis) capítulos 1 a 25; livro 12 (1 Crônicas) capítulos 1 a 7"
+ },
+ {
+  "n": 11,
+  "caps": 42,
+  "vers": 1049,
+  "faixas": "livro 12 (1 Crônicas) capítulos 8 a 29; livro 13 (2 Crônicas) capítulos 1 a 20"
+ },
+ {
+  "n": 12,
+  "caps": 38,
+  "vers": 1047,
+  "faixas": "livro 13 (2 Crônicas) capítulos 21 a 36; livro 14 (Esdras) capítulos 1 a 10; livro 15 (Neemias) capítulos 1 a 12"
+ },
+ {
+  "n": 13,
+  "caps": 45,
+  "vers": 1049,
+  "faixas": "livro 15 (Neemias) capítulos 13 a 13; livro 16 (Ester) capítulos 1 a 10; livro 17 (Jó) capítulos 1 a 34"
+ },
+ {
+  "n": 14,
+  "caps": 64,
+  "vers": 1048,
+  "faixas": "livro 17 (Jó) capítulos 35 a 42; livro 18 (Salmos) capítulos 1 a 56"
+ },
+ {
+  "n": 15,
+  "caps": 56,
+  "vers": 1045,
+  "faixas": "livro 18 (Salmos) capítulos 57 a 112"
+ },
+ {
+  "n": 16,
+  "caps": 54,
+  "vers": 1060,
+  "faixas": "livro 18 (Salmos) capítulos 113 a 150; livro 19 (Provérbios) capítulos 1 a 16"
+ },
+ {
+  "n": 17,
+  "caps": 48,
+  "vers": 1055,
+  "faixas": "livro 19 (Provérbios) capítulos 17 a 31; livro 20 (Eclesiastes) capítulos 1 a 12; livro 21 (Cânticos) capítulos 1 a 8; livro 22 (Isaías) capítulos 1 a 13"
+ },
+ {
+  "n": 18,
+  "caps": 54,
+  "vers": 1037,
+  "faixas": "livro 22 (Isaías) capítulos 14 a 66; livro 23 (Jeremias) capítulos 1 a 1"
+ },
+ {
+  "n": 19,
+  "caps": 42,
+  "vers": 1045,
+  "faixas": "livro 23 (Jeremias) capítulos 2 a 43"
+ },
+ {
+  "n": 20,
+  "caps": 37,
+  "vers": 1046,
+  "faixas": "livro 23 (Jeremias) capítulos 44 a 52; livro 24 (Lamentações) capítulos 1 a 5; livro 25 (Ezequiel) capítulos 1 a 23"
+ },
+ {
+  "n": 21,
+  "caps": 37,
+  "vers": 1038,
+  "faixas": "livro 25 (Ezequiel) capítulos 24 a 48; livro 26 (Daniel) capítulos 1 a 12"
+ },
+ {
+  "n": 22,
+  "caps": 66,
+  "vers": 1044,
+  "faixas": "livro 27 (Oseias) capítulos 1 a 14; livro 28 (Joel) capítulos 1 a 3; livro 29 (Amós) capítulos 1 a 9; livro 30 (Obadias) capítulos 1 a 1; livro 31 (Jonas) capítulos 1 a 4; livro 32 (Miqueias) capítulos 1 a 7; livro 33 (Naum) capítulos 1 a 3; livro 34 (Habacuque) capítulos 1 a 3; livro 35 (Sofonias) capítulos 1 a 3; livro 36 (Ageu) capítulos 1 a 2; livro 37 (Zacarias) capítulos 1 a 14; livro 38 (Malaquias) capítulos 1 a 3"
+ },
+ {
+  "n": 23,
+  "caps": 28,
+  "vers": 1057,
+  "faixas": "livro 38 (Malaquias) capítulos 4 a 4; livro 39 (Mateus) capítulos 1 a 27"
+ },
+ {
+  "n": 24,
+  "caps": 24,
+  "vers": 1050,
+  "faixas": "livro 39 (Mateus) capítulos 28 a 28; livro 40 (Marcos) capítulos 1 a 16; livro 41 (Lucas) capítulos 1 a 7"
+ },
+ {
+  "n": 25,
+  "caps": 23,
+  "vers": 1083,
+  "faixas": "livro 41 (Lucas) capítulos 8 a 24; livro 42 (João) capítulos 1 a 6"
+ },
+ {
+  "n": 26,
+  "caps": 28,
+  "vers": 1086,
+  "faixas": "livro 42 (João) capítulos 7 a 21; livro 43 (Atos) capítulos 1 a 13"
+ },
+ {
+  "n": 27,
+  "caps": 35,
+  "vers": 1040,
+  "faixas": "livro 43 (Atos) capítulos 14 a 28; livro 44 (Romanos) capítulos 1 a 16; livro 45 (1 Coríntios) capítulos 1 a 4"
+ },
+ {
+  "n": 28,
+  "caps": 42,
+  "vers": 1040,
+  "faixas": "livro 45 (1 Coríntios) capítulos 5 a 16; livro 46 (2 Coríntios) capítulos 1 a 13; livro 47 (Gálatas) capítulos 1 a 6; livro 48 (Efésios) capítulos 1 a 6; livro 49 (Filipenses) capítulos 1 a 4; livro 50 (Colossenses) capítulos 1 a 1"
+ },
+ {
+  "n": 29,
+  "caps": 51,
+  "vers": 1046,
+  "faixas": "livro 50 (Colossenses) capítulos 2 a 4; livro 51 (1 Tessalonicenses) capítulos 1 a 5; livro 52 (2 Tessalonicenses) capítulos 1 a 3; livro 53 (1 Timóteo) capítulos 1 a 6; livro 54 (2 Timóteo) capítulos 1 a 4; livro 55 (Tito) capítulos 1 a 3; livro 56 (Filemom) capítulos 1 a 1; livro 57 (Hebreus) capítulos 1 a 13; livro 58 (Tiago) capítulos 1 a 5; livro 59 (1 Pedro) capítulos 1 a 5; livro 60 (2 Pedro) capítulos 1 a 3"
+ },
+ {
+  "n": 30,
+  "caps": 30,
+  "vers": 561,
+  "faixas": "livro 61 (1 João) capítulos 1 a 5; livro 62 (2 João) capítulos 1 a 1; livro 63 (3 João) capítulos 1 a 1; livro 64 (Judas) capítulos 1 a 1; livro 65 (Apocalipse) capítulos 1 a 22"
+ }
+]

@@ -8,6 +8,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "dados": "node scripts/preparar-dados.mjs",
+    "kj": "node scripts/montar-kj.mjs",
     "biblia": "node scripts/importar-biblia.mjs"
   },
   "dependencies": {
