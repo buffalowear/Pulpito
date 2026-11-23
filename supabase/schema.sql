@@ -248,3 +248,22 @@ drop policy if exists trechos_criar on public.apostila_trechos;
 create policy trechos_criar on public.apostila_trechos for insert to authenticated with check (public.sou_admin());
 drop policy if exists trechos_apagar on public.apostila_trechos;
 create policy trechos_apagar on public.apostila_trechos for delete to authenticated using (public.sou_admin());
+
+-- ---------------------------------------------------------------------
+-- 4. PROVISÓRIO: cadastro sem confirmação por e-mail
+-- ---------------------------------------------------------------------
+-- Marca o e-mail como confirmado no momento do cadastro. Qualquer pessoa pode
+-- criar conta com qualquer e-mail, sem provar que é dela.
+-- Para voltar a exigir a confirmação, rode:
+--   drop trigger if exists confirmar_email_automatico on auth.users;
+create or replace function public.confirmar_email_automatico() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.email_confirmed_at is null then new.email_confirmed_at := now(); end if;
+  return new;
+end;
+$$;
+revoke all on function public.confirmar_email_automatico() from public, anon, authenticated;
+drop trigger if exists confirmar_email_automatico on auth.users;
+create trigger confirmar_email_automatico before insert on auth.users
+  for each row execute function public.confirmar_email_automatico();

@@ -29,7 +29,7 @@ beforeAll(async () => {
   await db.exec(`
     create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
     create schema auth;
-    create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}'::jsonb);
+    create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}'::jsonb, email_confirmed_at timestamptz);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
     grant usage on schema public, auth to anon, authenticated, service_role;
   `);
@@ -49,6 +49,10 @@ describe('cadastro e perfis', () => {
   it('cria o perfil automaticamente no cadastro, como usuário comum', async () => {
     const r = await db.query<{ nome: string; papel: string }>(`select nome, papel from perfis order by email`);
     expect(r.rows).toEqual([{ nome: 'Ana', papel: 'usuario' }, { nome: 'Beto', papel: 'usuario' }, { nome: '', papel: 'usuario' }]);
+  });
+  it('provisório: o e-mail já sai confirmado no cadastro', async () => {
+    const r = await db.query<{ n: number }>(`select count(*)::int as n from auth.users where email_confirmed_at is null`);
+    expect(r.rows[0].n).toBe(0);
   });
   it('cada um vê só o próprio perfil', async () => {
     expect((await como(BETO, 'select id from perfis')).map((r) => r.id)).toEqual([BETO]);

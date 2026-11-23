@@ -18,7 +18,9 @@ import { TelaPerfil } from './TelaPerfil';
 import { Admin } from './Admin';
 import { Privacidade } from './Privacidade';
 
-const lerRota = () => (typeof window === 'undefined' ? '/' : window.location.hash.replace(/^#/, '') || '/');
+// Endereços do app começam por "#/". Qualquer outro trecho depois do # (como o aviso de erro
+// que o Supabase acrescenta quando um link de e-mail venceu) é ignorado.
+const lerRota = () => { const h = typeof window === 'undefined' ? '' : window.location.hash.replace(/^#/, ''); return h.startsWith('/') ? h : '/'; };
 
 export function App() {
   const [sessao, setSessao] = useState<Session | null | undefined>(undefined);

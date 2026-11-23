@@ -16,22 +16,28 @@ export function Entrar() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [senha2, setSenha2] = useState('');
   const [msg, setMsg] = useState('');
   const [ocupado, setOcupado] = useState(false);
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setMsg('');
+    if (modo === 'criar' && senha !== senha2) { setMsg('As duas senhas não são iguais. Digite de novo.'); return; }
     setOcupado(true);
     try {
-      const aqui = window.location.origin + '/';
+      const aqui = window.location.origin + window.location.pathname;
       if (modo === 'entrar') {
         const { error } = await supa().auth.signInWithPassword({ email: email.trim(), password: senha });
         if (error) setMsg(traduzir(error.message));
       } else if (modo === 'criar') {
         const { data, error } = await supa().auth.signUp({ email: email.trim(), password: senha, options: { data: { nome: nome.trim() }, emailRedirectTo: aqui } });
         if (error) setMsg(traduzir(error.message));
-        else if (!data.session) setMsg('Conta criada. Abra o link que enviamos para o seu e-mail para confirmar e depois entre.');
+        else if (!data.session) {
+          // se o projeto ainda exigir confirmação por e-mail, tenta entrar direto; se não der, avisa
+          const r = await supa().auth.signInWithPassword({ email: email.trim(), password: senha });
+          if (r.error) setMsg('Conta criada. Abra o link que enviamos para o seu e-mail para confirmar e depois entre.');
+        }
       } else {
         const { error } = await supa().auth.resetPasswordForEmail(email.trim(), { redirectTo: aqui });
         setMsg(error ? traduzir(error.message) : 'Enviamos um link para o seu e-mail. Abra-o neste aparelho para definir uma nova senha.');
@@ -41,7 +47,7 @@ export function Entrar() {
 
   async function google() {
     setMsg('');
-    const { error } = await supa().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/' } });
+    const { error } = await supa().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
     if (error) setMsg(traduzir(error.message));
   }
 
@@ -60,6 +66,10 @@ export function Entrar() {
           <div><label className="rotulo" htmlFor="email">E-mail</label><input id="email" type="email" className="campo" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" inputMode="email" /></div>
           {modo !== 'esqueci' ? (
             <div><label className="rotulo" htmlFor="senha">Senha</label><input id="senha" type="password" className="campo" value={senha} onChange={(e) => setSenha(e.target.value)} required minLength={6} autoComplete={modo === 'criar' ? 'new-password' : 'current-password'} /></div>
+          ) : null}
+          {modo === 'criar' ? (
+            <div><label className="rotulo" htmlFor="senha2">Repita a senha</label><input id="senha2" type="password" className="campo" value={senha2} onChange={(e) => setSenha2(e.target.value)} required minLength={6} autoComplete="new-password" aria-invalid={!!senha2 && senha !== senha2} />
+              {senha2 && senha !== senha2 ? <p className="ajuda" style={{ color: 'var(--red)' }}>As senhas ainda não são iguais.</p> : null}</div>
           ) : null}
           {msg ? <p className="aviso m-0" role="alert">{msg}</p> : null}
           <button type="submit" className="btn btn-pri" disabled={ocupado}>{ocupado ? 'Aguarde…' : modo === 'entrar' ? 'Entrar' : modo === 'criar' ? 'Criar conta' : 'Enviar link'}</button>
@@ -125,10 +135,12 @@ export function CompletarPerfil() {
 /** Depois de abrir o link de "esqueci a senha": define a nova senha. */
 export function NovaSenha({ aoConcluir }: { aoConcluir: () => void }) {
   const [senha, setSenha] = useState('');
+  const [senha2, setSenha2] = useState('');
   const [msg, setMsg] = useState('');
   const [ocupado, setOcupado] = useState(false);
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
+    if (senha !== senha2) { setMsg('As duas senhas não são iguais. Digite de novo.'); return; }
     setOcupado(true);
     const { error } = await supa().auth.updateUser({ password: senha });
     setOcupado(false);
@@ -139,6 +151,7 @@ export function NovaSenha({ aoConcluir }: { aoConcluir: () => void }) {
       <form onSubmit={salvar} className="cartao flex flex-col gap-3">
         <h1 className="tit">Definir nova senha</h1>
         <div><label className="rotulo" htmlFor="nSenha">Nova senha</label><input id="nSenha" type="password" className="campo" value={senha} onChange={(e) => setSenha(e.target.value)} required minLength={6} autoComplete="new-password" /></div>
+        <div><label className="rotulo" htmlFor="nSenha2">Repita a nova senha</label><input id="nSenha2" type="password" className="campo" value={senha2} onChange={(e) => setSenha2(e.target.value)} required minLength={6} autoComplete="new-password" /></div>
         {msg ? <p className="aviso m-0" role="alert">{msg}</p> : null}
         <button type="submit" className="btn btn-pri" disabled={ocupado}>{ocupado ? 'Salvando…' : 'Salvar nova senha'}</button>
         <button type="button" className="btn" onClick={aoConcluir}>Agora não</button>
