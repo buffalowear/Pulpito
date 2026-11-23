@@ -5,7 +5,7 @@ const cheio = { fill: 'currentColor', viewBox: '0 0 24 24', 'aria-hidden': true 
 
 export const IcoInicio = (p: P) => <svg {...traco} {...p}><path d="M3 11l9-7 9 7" /><path d="M5 10v10h14V10" /><path d="M10 20v-6h4v6" /></svg>;
 export const IcoMensagens = (p: P) => <svg {...traco} {...p}><path d="M5 4h11l3 3v13H5z" /><path d="M9 9h6M9 13h6M9 17h4" /></svg>;
-export const IcoBiblia = (p: P) => <svg {...traco} {...p}><path d="M6 3h12v18H6a2 2 0 01-2-2V5a2 2 0 012-2z" /><path d="M12 7v7M9.5 9.5h5" /></svg>;
+export const IcoBiblia = (p: P) => <svg {...traco} {...p}><path d="M11.4 6.2C9 4.8 5.8 4.8 3 5.7v11.6c2.8-.9 6-.9 8.4.5z" /><path d="M12.6 6.2C15 4.8 18.2 4.8 21 5.7v11.6c-2.8-.9-6-.9-8.4.5z" /></svg>;
 export const IcoPerfil = (p: P) => <svg {...traco} {...p}><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>;
 export const IcoMais = (p: P) => <svg {...traco} strokeWidth={2.2} {...p}><path d="M12 5v14M5 12h14" /></svg>;
 export const IcoVoltar = (p: P) => <svg {...traco} strokeWidth={2.4} {...p}><path d="M14.5 6.5L9 12l5.5 5.5" /></svg>;

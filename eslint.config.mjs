@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     'referencia/**',
     'public/sw.js',
+    'scripts/gerar-icones.cjs',
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",

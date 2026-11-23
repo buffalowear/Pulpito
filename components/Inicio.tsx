@@ -5,6 +5,7 @@ import { versaoPorId, VERSOES } from '@/lib/versoes';
 import { novaMensagem, pendentes, salvarMensagem, useDados } from '@/lib/cliente/dados';
 import { pref } from '@/lib/cliente/local';
 import { ir, useApp } from './contexto';
+import { Logo } from './Logo';
 
 function saudacao(h: number) { return h < 5 ? 'Boa madrugada' : h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; }
 
@@ -26,7 +27,7 @@ export function Inicio() {
     <>
     <header className="topo px-5 pb-9" style={{ paddingTop: 'max(28px, env(safe-area-inset-top))' }}>
       <div className="mx-auto max-w-2xl">
-        <p className="m-0 text-[30px] font-black leading-none">Púl<span className="text-ouro">pito</span></p>
+        <p className="m-0"><Logo tamanho={26} /></p>
         <h1 className="mt-5 text-[26px]">{saudacao(agora.getHours())}{primeiro ? `, ${primeiro}` : ''}.</h1>
         <p className="rot m-0 mt-2 first-letter:uppercase">{data}</p>
       </div>

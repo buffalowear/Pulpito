@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { CARGOS, type Perfil } from '@/lib/tipos';
 import { supa } from '@/lib/cliente/supabase';
 import { useApp } from './contexto';
+import { Logo } from './Logo';
 
 const ERROS: Record<string, string> = {
   'Invalid login credentials': 'E-mail ou senha incorretos.',
@@ -55,7 +56,7 @@ export function Entrar() {
     <main className="topo min-h-dvh px-5 pb-10 pt-[max(56px,env(safe-area-inset-top))]">
       <div className="mx-auto max-w-sm">
         <p className="rot m-0">Igreja Cristã Maranata</p>
-        <h1 className="mt-2 text-[46px]">Púl<span className="text-ouro">pito</span></h1>
+        <h1 className="mt-3"><Logo tamanho={40} /></h1>
         <div className="ornamento !mx-0" aria-hidden="true" />
         <p className="mb-6 mt-5">Bíblia, anotações e mensagens.</p>
         <form onSubmit={enviar} className="cartao flex flex-col gap-3">

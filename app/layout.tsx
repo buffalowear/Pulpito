@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   applicationName: 'Púlpito',
   manifest: `${BASE}/manifest.webmanifest`,
   appleWebApp: { capable: true, title: 'Púlpito', statusBarStyle: 'default' },
-  icons: { icon: `${BASE}/icone-192.png`, apple: `${BASE}/icone-180.png` },
+  icons: { icon: [{ url: `${BASE}/logo/icone-app.svg`, type: 'image/svg+xml' }, { url: `${BASE}/icone-48.png`, sizes: '48x48' }, { url: `${BASE}/icone-192.png`, sizes: '192x192' }], apple: `${BASE}/icone-180.png` },
 };
 
 export const viewport: Viewport = { themeColor: '#4a1626', width: 'device-width', initialScale: 1, viewportFit: 'cover' };
