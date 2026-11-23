@@ -46,12 +46,12 @@ export function Entrar() {
   }
 
   return (
-    <main className="min-h-dvh px-5 pb-10 pt-[max(56px,env(safe-area-inset-top))]">
+    <main className="topo min-h-dvh px-5 pb-10 pt-[max(56px,env(safe-area-inset-top))]">
       <div className="mx-auto max-w-sm">
         <p className="rot m-0">Igreja Cristã Maranata</p>
-        <h1 className="mt-2 text-[46px]">Púlpito</h1>
+        <h1 className="mt-2 text-[46px]">Púl<span className="text-ouro">pito</span></h1>
         <div className="ornamento !mx-0" aria-hidden="true" />
-        <p className="mb-6 mt-5 text-mute">Bíblia, anotações e mensagens.</p>
+        <p className="mb-6 mt-5">Bíblia, anotações e mensagens.</p>
         <form onSubmit={enviar} className="cartao flex flex-col gap-3">
           <h2 className="tit">{modo === 'entrar' ? 'Entrar' : modo === 'criar' ? 'Criar conta' : 'Recuperar senha'}</h2>
           {modo === 'criar' ? (
@@ -69,7 +69,7 @@ export function Entrar() {
             {modo === 'entrar' ? <button type="button" className="underline" onClick={() => { setModo('esqueci'); setMsg(''); }}>Esqueci a senha</button> : null}
           </div>
         </form>
-        <p className="mt-4 text-center text-[13.5px] text-mute">Ao entrar, você concorda com a <a className="underline" href="#/privacidade">política de privacidade</a>.</p>
+        <p className="mt-4 text-center text-[13.5px]">Ao entrar, você concorda com a <a className="underline" href="#/privacidade">política de privacidade</a>.</p>
       </div>
     </main>
   );

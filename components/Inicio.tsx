@@ -23,11 +23,15 @@ export function Inicio() {
   const nova = () => { const m = novaMensagem(perfil.id); salvarMensagem(m); ir(`/mensagens/${m.id}`); };
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-5 px-5 pb-8" style={{ paddingTop: 'max(28px, env(safe-area-inset-top))' }}>
-      <header>
-        <p className="rot m-0 first-letter:uppercase">{data}</p>
-        <h1 className="mt-2 text-[30px]">{saudacao(agora.getHours())}{primeiro ? `, ${primeiro}` : ''}.</h1>
-      </header>
+    <>
+    <header className="topo px-5 pb-9" style={{ paddingTop: 'max(28px, env(safe-area-inset-top))' }}>
+      <div className="mx-auto max-w-2xl">
+        <p className="m-0 text-[30px] font-black leading-none">Púl<span className="text-ouro">pito</span></p>
+        <h1 className="mt-5 text-[26px]">{saudacao(agora.getHours())}{primeiro ? `, ${primeiro}` : ''}.</h1>
+        <p className="rot m-0 mt-2 first-letter:uppercase">{data}</p>
+      </div>
+    </header>
+    <main className="mx-auto -mt-5 flex max-w-2xl flex-col gap-5 px-5 pb-8">
 
       <section className="cartao" aria-label="Bíblia">
         <p className="rot m-0">Bíblia</p>
@@ -57,5 +61,6 @@ export function Inicio() {
 
       {fila ? <p className="aviso m-0">{fila} {fila === 1 ? 'alteração aguardando' : 'alterações aguardando'} internet para sincronizar.</p> : null}
     </main>
+    </>
   );
 }

@@ -5,7 +5,7 @@ import { ir } from './contexto';
 /** Cabeçalho de cada módulo, com o botão de voltar. */
 export function Cabecalho({ titulo, sub, voltar = '/', children }: { titulo: string; sub?: string; voltar?: string; children?: React.ReactNode }) {
   return (
-    <header className="sticky top-0 z-20 bg-bg/95 backdrop-blur" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <header className="topo sticky top-0 z-20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-2">
         <button type="button" onClick={() => ir(voltar)} aria-label={voltar === '/' ? 'Voltar ao início' : 'Voltar'} className="redondo"><IcoVoltar /></button>
         <div className="flex-1">

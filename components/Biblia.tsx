@@ -132,9 +132,9 @@ export function Biblia({ alvo }: { alvo: number[] }) {
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex items-center justify-between bg-bg/95 px-4 py-2 backdrop-blur" style={{ paddingTop: 'max(8px, env(safe-area-inset-top))' }}>
+      <header className="topo sticky top-0 z-20 flex items-center justify-between px-4 py-2" style={{ paddingTop: 'max(8px, env(safe-area-inset-top))' }}>
         <button type="button" className="redondo" onClick={() => ir('/')} aria-label="Voltar ao início"><IcoVoltar /></button>
-        <button type="button" className="rot rounded-full border border-line px-4 py-2.5" onClick={() => setAberto('menu')} aria-label="Escolher a Bíblia">{versao.sigla}{comparar ? ` + ${versaoPorId(comparar).sigla}` : ''}</button>
+        <button type="button" className="rot rounded-full border px-4 py-2.5" onClick={() => setAberto('menu')} aria-label="Escolher a Bíblia">{versao.sigla}{comparar ? ` + ${versaoPorId(comparar).sigla}` : ''}</button>
         <div className="flex gap-2">
           <button type="button" className="redondo" onClick={() => setAberto('busca')} aria-label="Buscar"><IcoBusca /></button>
           <button type="button" className="redondo" onClick={() => setAberto('menu')} aria-label="Livro, capítulo e opções"><IcoMenu /></button>
